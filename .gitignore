@@ -44,3 +44,6 @@
 .idea/
 .vscode/
 .vs
+
+# Compiled outputs
+x64/
