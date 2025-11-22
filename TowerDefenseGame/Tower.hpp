@@ -1,13 +1,14 @@
 #pragma once
-#include "Entity.hpp"
-#include "Enemy.hpp"
-#include "Projectile.hpp"
-#include "Utils.hpp"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "Enemy.hpp"
+#include "Entity.hpp"
+#include "Projectile.hpp"
+#include "Utils.hpp"
 
 enum class TowerType {
     Basic,

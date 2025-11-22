@@ -1,4 +1,5 @@
 #include "Map.hpp"
+
 #include <algorithm>
 #include <cmath>
 
@@ -6,13 +7,11 @@ Map::Map(sf::Vector2u gridSize, float tileSize)
     : m_gridSize(gridSize),
     m_tileSize(tileSize),
     m_heat(gridSize.x* gridSize.y, 0.f),
-    m_vertices(sf::PrimitiveType::Triangles)
-{
+    m_vertices(sf::PrimitiveType::Triangles) {
     buildVertices();
 }
 
-void Map::buildVertices()
-{
+void Map::buildVertices() {
     m_vertices.clear();
     m_vertices.resize(static_cast<std::size_t>(m_gridSize.x) * m_gridSize.y * 6); // 6 verts per tile (2 triangles)
     std::size_t idx = 0;
@@ -38,8 +37,7 @@ void Map::buildVertices()
     updateColors();
 }
 
-sf::Vector2u Map::worldToTile(const sf::Vector2f& worldPos) const
-{
+sf::Vector2u Map::worldToTile(const sf::Vector2f& worldPos) const {
     int tx = static_cast<int>(std::floor(worldPos.x / m_tileSize));
     int ty = static_cast<int>(std::floor(worldPos.y / m_tileSize));
     tx = std::clamp(tx, 0, static_cast<int>(m_gridSize.x) - 1);
@@ -47,8 +45,7 @@ sf::Vector2u Map::worldToTile(const sf::Vector2f& worldPos) const
     return { static_cast<unsigned>(tx), static_cast<unsigned>(ty) };
 }
 
-void Map::addPosition(const sf::Vector2f& worldPos, float weight)
-{
+void Map::addPosition(const sf::Vector2f& worldPos, float weight) {
     auto t = worldToTile(worldPos);
     std::size_t index = static_cast<std::size_t>(t.y * m_gridSize.x + t.x);
     m_heat[index] += weight;
@@ -56,8 +53,7 @@ void Map::addPosition(const sf::Vector2f& worldPos, float weight)
     updateColors();
 }
 
-void Map::addPath(const std::vector<sf::Vector2f>& worldPath)
-{
+void Map::addPath(const std::vector<sf::Vector2f>& worldPath) {
     if (worldPath.empty()) return;
     // 在點之間插值，每隔一小段取樣加入
     for (std::size_t i = 0; i + 1 < worldPath.size(); ++i) {
@@ -77,8 +73,7 @@ void Map::addPath(const std::vector<sf::Vector2f>& worldPath)
     if (worldPath.size() == 1) addPosition(worldPath[0], 1.f);
 }
 
-void Map::decay(float factor)
-{
+void Map::decay(float factor) {
     factor = std::clamp(factor, 0.f, 1.f);
     m_maxHeat = 0.f;
     for (auto& v : m_heat) {
@@ -89,15 +84,13 @@ void Map::decay(float factor)
     updateColors();
 }
 
-void Map::clear()
-{
+void Map::clear() {
     std::fill(m_heat.begin(), m_heat.end(), 0.f);
     m_maxHeat = 1.f;
     updateColors();
 }
 
-sf::Color Map::colorForValue(float normalized) const
-{
+sf::Color Map::colorForValue(float normalized) const {
     // normalized in [0,1];
     normalized = std::clamp(normalized, 0.f, 1.f);
 
@@ -111,8 +104,7 @@ sf::Color Map::colorForValue(float normalized) const
     return sf::Color(255, 255, 0, 200);
 }
 
-void Map::updateColors()
-{
+void Map::updateColors() {
     // 找最大值（已由 addPosition/decay 維護，但保險起見再計算一次）
     float maxv = 0.f;
     for (float v : m_heat) if (v > maxv) maxv = v;
@@ -132,7 +124,6 @@ void Map::updateColors()
     }
 }
 
-void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const
-{
+void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const {
     target.draw(m_vertices, states);
 }

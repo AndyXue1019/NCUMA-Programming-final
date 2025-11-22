@@ -1,15 +1,19 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <memory> // for std::unique_ptr and std::shared_ptr
+#include <optional>
 #include <vector>
-#include <memory> // for std::unique_ptr
 
 #include "Config.hpp"
-#include "Map.hpp"
-#include "Tower.hpp"
 #include "Enemy.hpp"
+#include "GameUI.hpp"
+#include "Map.hpp"
 #include "PlayerStats.hpp"
 #include "Projectile.hpp"
+#include "Tower.hpp"
 #include "WaveManager.hpp"
+
+enum class GameState { Shop, WaveRunning, GameOver };
 
 class Game {
    public:
@@ -42,7 +46,13 @@ class Game {
     PlayerStats m_playerStats;
     std::unique_ptr<WaveManager> m_waveManager;
 
+    GameState m_gameState = GameState::Shop;
+    std::optional<TowerType> m_selectedTower;
+
+    
     // UI ¸ê·½
+    std::unique_ptr<GameUI> m_gameUI;
+
     sf::Font m_font;
     sf::Text m_uiText;
 
@@ -50,4 +60,7 @@ class Game {
     void updateUI();
 
     TowerType m_selectedTowerType;
+
+    void handleShopClick(sf::Vector2f mousePos);
+    void handleMapClick(sf::Vector2f mousePos);
 };

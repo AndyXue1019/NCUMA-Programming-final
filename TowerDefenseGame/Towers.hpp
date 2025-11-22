@@ -1,6 +1,7 @@
 #pragma once
-#include "SFML/Graphics.hpp"
+#include <SFML/Graphics.hpp>
 #include "Tower.hpp"
+#include "TowerData.hpp"
 #include "Utils.hpp"
 #include <cstdint>
 #include <iostream>
@@ -10,12 +11,14 @@
 class BasicTower : public Tower {
    public:
     BasicTower(sf::Vector2f pos, auto& e, auto& p) : Tower(pos, e, p) {
-        m_name = "Basic";
+        const auto& info = TowerData::INFO.at(TowerType::Basic);
+        m_name = info.name;
+        m_price = info.price;
+        m_shape.setFillColor(info.color);
+
         m_range = 150.f;
         m_damage = 20;
         m_cooldownTime = 1.0f;
-        m_price = 50;
-        m_shape.setFillColor(sf::Color::White);
     }
 
    protected:
@@ -33,12 +36,14 @@ class BasicTower : public Tower {
 class LaserTower : public Tower {
    public:
     LaserTower(sf::Vector2f pos, auto& e, auto& p) : Tower(pos, e, p) {
-        m_name = "Laser";
+        const auto& info = TowerData::INFO.at(TowerType::Laser);
+        m_name = info.name;
+        m_price = info.price;
+        m_shape.setFillColor(info.color);
+        
         m_range = 120.f;
-        m_damage = 10;  // 低傷
+        m_damage = 10;          // 低傷
         m_cooldownTime = 0.5f;  // 極快
-        m_price = 120;
-        m_shape.setFillColor(sf::Color::Red);
     }
 
     void draw(sf::RenderWindow& window) override {
@@ -82,12 +87,14 @@ class LaserTower : public Tower {
 class SniperTower : public Tower {
    public:
     SniperTower(sf::Vector2f pos, auto& e, auto& p) : Tower(pos, e, p) {
-        m_name = "Sniper";
+        const auto& info = TowerData::INFO.at(TowerType::Sniper);
+        m_name = info.name;
+        m_price = info.price;
+        m_shape.setFillColor(info.color);
+
         m_range = 400.f;        // 超遠
         m_damage = 100;         // 高傷
         m_cooldownTime = 3.0f;  // 慢
-        m_price = 200;
-        m_shape.setFillColor(sf::Color::Green);
     }
 
    protected:
@@ -104,11 +111,13 @@ class SniperTower : public Tower {
 class SlowTower : public Tower {
    public:
     SlowTower(sf::Vector2f pos, auto& e, auto& p) : Tower(pos, e, p) {
-        m_name = "Slow";
+        const auto& info = TowerData::INFO.at(TowerType::Slow);
+        m_name = info.name;
+        m_price = info.price;
+        m_shape.setFillColor(info.color);  // Cyan
+
         m_range = 100.f;
         m_cooldownTime = 0.5f;  // 每 0.5 秒刷新一次緩速狀態
-        m_price = 150;
-        m_shape.setFillColor(sf::Color(0, 255, 255));  // Cyan
     }
 
    protected:
@@ -130,11 +139,13 @@ class SlowTower : public Tower {
 class TeleportTower : public Tower {
    public:
     TeleportTower(sf::Vector2f pos, auto& e, auto& p) : Tower(pos, e, p) {
-        m_name = "Teleport";
+        const auto& info = TowerData::INFO.at(TowerType::Teleport);
+        m_name = info.name;
+        m_price = info.price;
+        m_shape.setFillColor(sf::Color::Magenta);
+
         m_range = 200.f;
         m_cooldownTime = 5.0f;  // 長冷卻
-        m_price = 300;
-        m_shape.setFillColor(sf::Color::Magenta);
     }
 
    protected:
@@ -154,12 +165,14 @@ class TeleportTower : public Tower {
 class SelfDestructTower : public Tower {
    public:
     SelfDestructTower(sf::Vector2f pos, auto& e, auto& p) : Tower(pos, e, p) {
-        m_name = "Mine";
+        const auto& info = TowerData::INFO.at(TowerType::SelfDestruct);
+        m_name = info.name;
+        m_price = info.price;
+        m_shape.setFillColor(info.color);  // 深灰
+
         m_range = 80.f;         // 觸發半徑
         m_damage = 500;         // 巨大傷害
         m_cooldownTime = 0.1f;  // 隨時準備
-        m_price = 100;
-        m_shape.setFillColor(sf::Color(50, 50, 50));  // 深灰
 
         // 爆炸特效 (圓形衝擊波)
         m_shockwave.setRadius(10.f);
