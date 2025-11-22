@@ -1,18 +1,25 @@
 #include "Config.hpp"
 #include "Game.hpp"
 #include "Towers.hpp"
+#include "Map.hpp"
 #include <format> // C++20 for std::format
 #include <iostream>
 
+
 Game::Game()
     : m_window(sf::VideoMode({Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT}), "Tower Defense Game"),
-      m_map(),
+      // 建立 Map：格子數 = 視窗大小 / 每格像素 (Config::GRID_SIZE)
+      m_map(sf::Vector2u(Config::WINDOW_WIDTH / Config::GRID_SIZE, Config::WINDOW_HEIGHT / Config::GRID_SIZE),
+            static_cast<float>(Config::GRID_SIZE)),
       m_uiText(m_font),
       m_selectedTowerType(TowerType::Basic) {
     m_window.setFramerateLimit(Config::FRAME_RATE_LIMIT);
 
     loadResources();
     initTestPath();
+
+    // 把測試路徑加入 Map，使路徑格子被標記並顯示為黃色
+    m_map.addPath(m_testPath);
 
     m_waveManager = std::make_unique<WaveManager>(m_enemies, m_testPath, m_playerStats);
 }
@@ -194,7 +201,7 @@ void Game::updateUI() {
 void Game::render() {
     // 畫地圖
     m_window.clear(sf::Color::Black);
-    m_map.draw(m_window);
+    m_map.draw(m_window, sf::RenderStates::Default);
     // 畫防禦塔
     for (const auto& tower : m_towers) tower->draw(m_window);
     // 畫敵人
