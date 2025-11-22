@@ -3,3 +3,10 @@
 
 # Compiled outputs
 x64/
+
+# SFML
+Includes/SFML/*
+!Includes/SFML/include
+!Includes/SFML/lib
+!Includes/SFML/license.md
+!Includes/SFML/readme.md
