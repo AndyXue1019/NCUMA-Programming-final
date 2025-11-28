@@ -38,3 +38,17 @@ std::shared_ptr<Enemy> Tower::findTarget(float range) {
     }
     return nullptr;
 }
+
+void Tower::upgrade() {
+    if (Tower::isMaxLevel()) return;
+    m_level++;
+    m_damage = static_cast<int>(m_damage * 1.5);
+}
+
+int Tower::getUpgradeCost() const {
+    return m_price * m_level;
+}
+
+int Tower::getNextLevelDamage() const {
+	return static_cast<int>(m_damage * 1.5);
+}

@@ -153,6 +153,7 @@
     <ClInclude Include="Tower.hpp" />
     <ClInclude Include="TowerData.hpp" />
     <ClInclude Include="Towers.hpp" />
+    <ClInclude Include="UpgradePanel.hpp" />
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="WaveManager.hpp" />
   </ItemGroup>

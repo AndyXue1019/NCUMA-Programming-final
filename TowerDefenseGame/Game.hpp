@@ -12,6 +12,7 @@
 #include "Projectile.hpp"
 #include "Tower.hpp"
 #include "WaveManager.hpp"
+#include "UpgradePanel.hpp"
 
 enum class GameState { Shop, WaveRunning, GameOver };
 
@@ -63,4 +64,6 @@ class Game {
 
     void handleShopClick(sf::Vector2f mousePos);
     void handleMapClick(sf::Vector2f mousePos);
+
+    std::unique_ptr<UpgradePanel> m_upgradePanel;
 };

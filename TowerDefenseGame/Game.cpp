@@ -24,6 +24,8 @@ Game::Game()
 
     m_gameUI = std::make_unique<GameUI>(m_font, m_playerStats);
 
+    m_upgradePanel = std::make_unique<UpgradePanel>(m_font);
+    
     m_waveManager = std::make_unique<WaveManager>(m_enemies, m_testPath, m_playerStats);
 }
 
@@ -104,21 +106,28 @@ void Game::processEvents() {
                 m_selectedTowerType = TowerType::SelfDestruct;
                 std::cout << "Selected: Mine" << std::endl;
             }
-        } else if (const auto* mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
+        }
+        else if (const auto* mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
             if (mouseButton->button == sf::Mouse::Button::Left) {
                 sf::Vector2f mousePos(static_cast<float>(mouseButton->position.x), static_cast<float>(mouseButton->position.y));
 
-                // 判斷點擊位置是 UI 還是 地圖
-                // 假設 UI 在底部 BAR_HEIGHT 高度
+                // 1. 先檢查是否點到升級面板的按鈕 (優先權最高)
+                if (m_upgradePanel->handleClick(mousePos, m_playerStats)) {
+                    return; // 如果點了 UI，就不做其他事
+                }
+
+                // 2. 判斷點擊 UI 還是 地圖
                 if (mousePos.y > Config::WINDOW_HEIGHT - GameUI::BAR_HEIGHT) {
-                    handleShopClick(mousePos);  // 點擊 UI 區域
-                } else {
-                    handleMapClick(mousePos);  // 點擊地圖區域
+                    handleShopClick(mousePos);
+                }
+                else {
+                    handleMapClick(mousePos);
                 }
             }
-            // 右鍵取消選取
+            // 右鍵取消選取 / 關閉面板
             else if (mouseButton->button == sf::Mouse::Button::Right) {
                 m_selectedTower = std::nullopt;
+                m_upgradePanel->setSelectedTower(nullptr); // 關閉面板
             }
         }
     }
@@ -152,21 +161,26 @@ void Game::handleShopClick(sf::Vector2f mousePos) {
 }
 
 void Game::handleMapClick(sf::Vector2f mousePos) {
-    // 只有在戰鬥階段 (或你想允許商店階段佈陣也可以，看設計) 且有選中塔時才能放置
-    // 根據您的要求：塔可在回合結束時購買，回合開始後(WaveRunning) 就無法購買，
-    // 通常塔防遊戲允許隨時放置，只要手上有塔。
+    // -------------------------------------------------
+    // 情況 A: 建造模式 (手上已經選了要蓋的塔 m_selectedTower)
+    // -------------------------------------------------
+    if (m_selectedTower) {
+        TowerType type = *m_selectedTower;
 
-    if (!m_selectedTower) return;
+        // 1. 檢查庫存是否足夠
+        if (m_playerStats.inventory[type] > 0) {
 
-    // TODO: 這裡應該檢查放置位置是否合法 (Grid System)
-    // 目前先簡化為直接放置
+            // 2. (選用) 簡單碰撞檢查：不要蓋在其他塔上面
+            for (const auto& t : m_towers) {
+                if (t->getBounds().contains(mousePos)) {
+                    std::cout << "Cannot place tower here! Space occupied." << std::endl;
+                    return;
+                }
+            }
 
-    TowerType type = *m_selectedTower;
-
-    // 再次檢查庫存 (雙重保險)
-    if (m_playerStats.inventory[type] > 0) {
-        std::unique_ptr<Tower> newTower;
-        switch (type) {
+            // 3. 根據類型建立防禦塔
+            std::unique_ptr<Tower> newTower;
+            switch (type) {
             case TowerType::Basic:
                 newTower = std::make_unique<BasicTower>(mousePos, m_enemies, m_projectiles);
                 break;
@@ -185,17 +199,64 @@ void Game::handleMapClick(sf::Vector2f mousePos) {
             case TowerType::SelfDestruct:
                 newTower = std::make_unique<SelfDestructTower>(mousePos, m_enemies, m_projectiles);
                 break;
-        }
-
-        if (newTower) {
-            m_towers.push_back(std::move(newTower));
-            // 扣除庫存
-            m_playerStats.inventory[type]--;
-
-            // 如果庫存歸零，取消選取
-            if (m_playerStats.inventory[type] <= 0) {
-                m_selectedTower = std::nullopt;
             }
+
+            // 4. 放置成功後的處理
+            if (newTower) {
+                m_towers.push_back(std::move(newTower));
+
+                // 扣除庫存
+                m_playerStats.inventory[type]--;
+
+                // 放置新塔時，強制關閉升級面板，避免混淆
+                if (m_upgradePanel) {
+                    m_upgradePanel->setSelectedTower(nullptr);
+                }
+
+                std::cout << "Tower placed. Remaining stock: " << m_playerStats.inventory[type] << std::endl;
+
+                // 如果該種塔庫存歸零，取消手中的選取狀態
+                if (m_playerStats.inventory[type] <= 0) {
+                    m_selectedTower = std::nullopt;
+                    std::cout << "Out of stock, selection cleared." << std::endl;
+                }
+            }
+        }
+        else {
+            // 理論上 UI 會擋，但雙重保險
+            std::cout << "No inventory for this tower!" << std::endl;
+            m_selectedTower = std::nullopt;
+        }
+        return; // 建造模式結束，不執行下方的選取邏輯
+    }
+
+    // -------------------------------------------------
+    // 情況 B: 選取模式 (手上沒塔，點擊地圖上的塔來查看/升級)
+    // -------------------------------------------------
+    bool clickedTower = false;
+
+    // 遍歷所有塔，檢查滑鼠是否點在塔的範圍內
+    for (const auto& tower : m_towers) {
+        if (tower->getBounds().contains(mousePos)) {
+            // 找到了被點擊的塔
+            if (m_upgradePanel) {
+                // 通知 UI 面板顯示這座塔的資訊
+                m_upgradePanel->setSelectedTower(tower.get());
+            }
+
+            clickedTower = true;
+            std::cout << "Selected tower: " << tower->getName()
+                << " (Lv." << tower->getLevel() << ")" << std::endl;
+
+            // 選到一個就跳出迴圈 (避免重疊時一次選多個)
+            break;
+        }
+    }
+
+    // 如果點擊了地圖空白處 (沒點到任何塔)，則關閉面板
+    if (!clickedTower) {
+        if (m_upgradePanel) {
+            m_upgradePanel->setSelectedTower(nullptr);
         }
     }
 }
@@ -211,6 +272,8 @@ void Game::update(sf::Time dt) {
             std::cout << "Wave Cleared! Shopping Phase." << std::endl;
         }
     }
+
+    m_upgradePanel->update(dt);
 
     // 更新實體
     for (auto& enemy : m_enemies) enemy->update(dt);
@@ -269,6 +332,7 @@ void Game::render() {
     for (const auto& proj : m_projectiles) proj->draw(m_window);  // 畫子彈
 
     m_gameUI->draw(m_window, (m_gameState == GameState::Shop));  // 畫UI
+    m_upgradePanel->draw(m_window); //畫升級面板
 
     // Preview 放置中的塔
     if (m_selectedTower) {

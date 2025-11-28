@@ -33,6 +33,17 @@ class Tower : public Entity {
 
     int getLevel() const { return m_level; }
     int getPrice() const { return m_price; }
+    
+    //升級系統
+    void upgrade();
+    int getUpgradeCost() const;
+    int getNextLevelDamage() const;
+    bool isMaxLevel() const {return m_level >= 5;}
+
+    sf::FloatRect getBounds() const { return m_shape.getGlobalBounds(); }
+
+    std::string getName() const { return m_name; }
+    int getDamage() const { return m_damage; }
 
    protected:
     // 讓子類別實作具體攻擊邏輯
