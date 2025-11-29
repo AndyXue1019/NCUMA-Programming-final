@@ -142,11 +142,14 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Accessory.hpp" />
     <ClInclude Include="Config.hpp" />
     <ClInclude Include="Enemy.hpp" />
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Game.hpp" />
     <ClInclude Include="GameUI.hpp" />
+    <ClInclude Include="InventoryPanel.hpp" />
+    <ClInclude Include="Loot.hpp" />
     <ClInclude Include="Map.hpp" />
     <ClInclude Include="PlayerStats.hpp" />
     <ClInclude Include="Projectile.hpp" />

@@ -1,6 +1,15 @@
 #pragma once
 #include <SFML/System/Vector2.hpp>
 
+enum class TowerType {
+    Basic,
+    Laser,
+    Sniper,
+    Slow,
+    Teleport,
+    SelfDestruct
+};
+
 namespace Config {
 // µøµ¡³]©w
 constexpr unsigned int WINDOW_WIDTH = 1280;

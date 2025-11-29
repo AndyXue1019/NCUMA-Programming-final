@@ -3,12 +3,19 @@
 #include "Enemy.hpp"
 #include "Utils.hpp"
 
-Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target, int damage)
+Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target, int damage, bool isFire)
     : m_target(target), m_damage(damage) {
     m_shape.setRadius(5.f);
     m_shape.setFillColor(sf::Color::Yellow);
     m_shape.setOrigin(sf::Vector2f(5.f, 5.f));
     m_shape.setPosition(startPos);
+
+    if (m_isFire) {
+        m_shape.setFillColor(sf::Color(255, 69, 0)); // 火焰彈變橘紅色
+    }
+    else {
+        m_shape.setFillColor(sf::Color::Yellow);
+    }
 }
 
 void Projectile::update(sf::Time dt) {
@@ -25,6 +32,11 @@ void Projectile::update(sf::Time dt) {
 
     if (Utils::distance(m_shape.getPosition(), targetPos) < 20.f) {
         targetSp->takeDamage(m_damage);
+
+        if (m_isFire) {
+            targetSp->applyBurn(5.0f); // 持續 5 秒
+        }
+
         destroy();
         return;
     }

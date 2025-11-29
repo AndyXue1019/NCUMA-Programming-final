@@ -21,6 +21,8 @@ class Enemy : public Entity {
     sf::Vector2f getPosition() const override;
     void takeDamage(int damage);
 
+    void applyBurn(float duration);
+
     // Getters
     bool isDead() const { return m_hp <= 0; }
     int getBounty() const { return m_bounty; }  // ±¼¸¨ª÷¹ô
@@ -43,4 +45,8 @@ class Enemy : public Entity {
     float m_currentSpeed;
     float m_slowTimer = 0.f;
     bool m_isSlowed = false;
+
+    bool m_isBurning = false;
+    float m_burnTimer = 0.f;
+    float m_burnTickTimer = 0.f;
 };

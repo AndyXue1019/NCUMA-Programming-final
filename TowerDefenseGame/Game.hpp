@@ -1,8 +1,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <memory> // for std::unique_ptr and std::shared_ptr
+#include <memory> 
 #include <optional>
 #include <vector>
+#include <map> 
 
 #include "Config.hpp"
 #include "Enemy.hpp"
@@ -12,16 +13,18 @@
 #include "Projectile.hpp"
 #include "Tower.hpp"
 #include "WaveManager.hpp"
+#include "Loot.hpp"
+#include "InventoryPanel.hpp"
 #include "UpgradePanel.hpp"
 
 enum class GameState { Shop, WaveRunning, GameOver };
 
 class Game {
-   public:
+public:
     Game();
     void run();
 
-   private:
+private:
     void processEvents();
     void update(sf::Time dt);
     void render();
@@ -31,18 +34,16 @@ class Game {
     std::vector<sf::Vector2f> m_testPath;
     float m_spawnTimer = 0.f;
 
-    // SFML 視窗
     sf::RenderWindow m_window;
-
-    // 地圖實體
     Map m_map;
-
-    // 狀態標記
     bool m_isRunning = true;
 
     std::vector<std::shared_ptr<Enemy>> m_enemies;
     std::vector<std::unique_ptr<Tower>> m_towers;
     std::vector<std::unique_ptr<Projectile>> m_projectiles;
+
+    // 掉落物與飾品
+    std::vector<std::unique_ptr<Loot>> m_loots;
 
     PlayerStats m_playerStats;
     std::unique_ptr<WaveManager> m_waveManager;
@@ -50,12 +51,14 @@ class Game {
     GameState m_gameState = GameState::Shop;
     std::optional<TowerType> m_selectedTower;
 
-    
-    // UI 資源
     std::unique_ptr<GameUI> m_gameUI;
+    std::unique_ptr<UpgradePanel> m_upgradePanel;
+    std::unique_ptr<InventoryPanel> m_inventoryPanel;
 
     sf::Font m_font;
     sf::Text m_uiText;
+
+    // 移除 m_towerTextures
 
     void loadResources();
     void updateUI();
@@ -64,6 +67,4 @@ class Game {
 
     void handleShopClick(sf::Vector2f mousePos);
     void handleMapClick(sf::Vector2f mousePos);
-
-    std::unique_ptr<UpgradePanel> m_upgradePanel;
 };

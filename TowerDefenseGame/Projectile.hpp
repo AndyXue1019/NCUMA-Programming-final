@@ -6,7 +6,7 @@ class Enemy;
 
 class Projectile : public Entity {
    public:
-    Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target, int damage);
+    Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target, int damage, bool isFire = false);
 
     void update(sf::Time dt) override;
     void draw(sf::RenderWindow& window) override;
@@ -17,4 +17,5 @@ class Projectile : public Entity {
     std::weak_ptr<Enemy> m_target;  // °lÂÜ¥Ø¼Ð
     float m_speed = 400.f;
     int m_damage;
+	bool m_isFire = false;
 };

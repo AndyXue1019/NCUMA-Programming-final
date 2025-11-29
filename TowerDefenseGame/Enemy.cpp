@@ -79,6 +79,29 @@ void Enemy::update(sf::Time dt) {
         m_shape.move(Utils::normalize(dir) * m_currentSpeed * dt.asSeconds());
     }
 
+    if (m_isBurning) {
+        m_burnTimer -= dt.asSeconds();
+        m_burnTickTimer += dt.asSeconds();
+
+        // 每 1 秒扣 3% 最大血量
+        if (m_burnTickTimer >= 1.0f) {
+            m_burnTickTimer = 0.f;
+            int damage = static_cast<int>(m_maxHp * 0.03f);
+            if (damage < 1) damage = 1; // 至少扣 1 滴
+            takeDamage(damage);
+        }
+
+        if (m_burnTimer <= 0.f) {
+            m_isBurning = false;
+            // 如果原本顏色是 Red，可能需要重置顏色邏輯，這裡暫略
+            m_shape.setFillColor(sf::Color::Red); // 範例：恢復紅色
+        }
+        else {
+            // 灼燒中變橘色
+            m_shape.setFillColor(sf::Color(255, 100, 0));
+        }
+    }
+
     if (m_hp <= 0) destroy();
 }
 
@@ -112,4 +135,10 @@ sf::Vector2f Enemy::getPosition() const {
 
 void Enemy::takeDamage(int damage) {
     m_hp -= damage;
+}
+
+void Enemy::applyBurn(float duration) {
+    m_isBurning = true;
+    m_burnTimer = duration;
+    // 重置 tick timer 確保立即開始計時
 }

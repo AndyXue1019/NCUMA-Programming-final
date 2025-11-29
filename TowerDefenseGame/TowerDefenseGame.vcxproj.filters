@@ -83,5 +83,14 @@
     <ClInclude Include="UpgradePanel.hpp">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="Accessory.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="Loot.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="InventoryPanel.hpp">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

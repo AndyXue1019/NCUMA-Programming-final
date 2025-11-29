@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -9,54 +8,48 @@
 #include "Entity.hpp"
 #include "Projectile.hpp"
 #include "Utils.hpp"
+#include "Config.hpp" 
 
-enum class TowerType {
-    Basic,
-    Laser,
-    Sniper,
-    Slow,
-    Teleport,
-    SelfDestruct
-};
+struct PlayerStats;
 
 class Tower : public Entity {
-   public:
-    // 這裡傳入 worldEnemies 和 worldProjectiles 是為了讓塔能偵測敵人和生成子彈
-    Tower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& enemies,
-          std::vector<std::unique_ptr<Projectile>>& projectiles);
+public:
+    // 修改建構子：移除 Texture 參數
+    Tower(sf::Vector2f pos,
+        const std::vector<std::shared_ptr<Enemy>>& enemies,
+        std::vector<std::unique_ptr<Projectile>>& projectiles,
+        const PlayerStats& stats);
 
     virtual ~Tower() = default;
 
     void update(sf::Time dt) override;
     void draw(sf::RenderWindow& window) override;
-    sf::Vector2f getPosition() const override { return m_shape.getPosition(); }
 
-    int getLevel() const { return m_level; }
-    int getPrice() const { return m_price; }
-    
-    //升級系統
+    // 改回使用 m_shape
+    sf::Vector2f getPosition() const override { return m_shape.getPosition(); }
+    sf::FloatRect getBounds() const { return m_shape.getGlobalBounds(); }
+
     void upgrade();
     int getUpgradeCost() const;
     int getNextLevelDamage() const;
-    bool isMaxLevel() const {return m_level >= 5;}
-
-    sf::FloatRect getBounds() const { return m_shape.getGlobalBounds(); }
+    bool isMaxLevel() const { return m_level >= 5; }
 
     std::string getName() const { return m_name; }
     int getDamage() const { return m_damage; }
+    int getLevel() const { return m_level; }
+    int getPrice() const { return m_price; }
 
-   protected:
-    // 讓子類別實作具體攻擊邏輯
+protected:
     virtual void performAction() = 0;
-
-    // 輔助函式：尋找範圍內最近/最遠/血量最高的敵人
     std::shared_ptr<Enemy> findTarget(float range);
 
+    // 改回 RectangleShape
     sf::RectangleShape m_shape;
+
     const std::vector<std::shared_ptr<Enemy>>& m_enemies;
     std::vector<std::unique_ptr<Projectile>>& m_projectiles;
+    const PlayerStats& m_stats;
 
-    // 屬性
     std::string m_name;
     float m_range = 150.f;
     float m_cooldownTime = 1.0f;
