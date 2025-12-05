@@ -83,17 +83,29 @@ void Game::processEvents() {
             if (mouseButton->button == sf::Mouse::Button::Left) {
                 sf::Vector2f mousePos(static_cast<float>(mouseButton->position.x), static_cast<float>(mouseButton->position.y));
 
-                // [修正] 加入背包點擊檢查 (優先權 1)
-                if (m_inventoryPanel && m_inventoryPanel->handleClick(mousePos)) {
-                    return;
-                }
+                // -----------------------------------------------------------
+                // 優先順序 1: 背包 UI
+                // -----------------------------------------------------------
+                if (m_inventoryPanel) {
+                    // 嘗試處理背包點擊
+                    bool handled = m_inventoryPanel->handleMousePress(mousePos);
 
-                // 優先權 2: 升級面板
+                    if (handled) {
+                        return; // 如果點在背包上，就結束，不傳給地圖
+                    }
+                    else {
+                        // [需求達成] 點在背包外面 -> 自動關閉背包
+                        m_inventoryPanel->close();
+                    }
+                }
+                // -----------------------------------------------------------
+
+                // 優先順序 2: 升級面板
                 if (m_upgradePanel->handleClick(mousePos, m_playerStats)) {
                     return;
                 }
 
-                // 優先權 3: 商店或地圖
+                // 優先順序 3: 底部 UI 與 地圖
                 if (mousePos.y > Config::WINDOW_HEIGHT - GameUI::BAR_HEIGHT) {
                     handleShopClick(mousePos);
                 }
@@ -104,6 +116,15 @@ void Game::processEvents() {
             else if (mouseButton->button == sf::Mouse::Button::Right) {
                 m_selectedTower = std::nullopt;
                 m_upgradePanel->setSelectedTower(nullptr);
+            }
+        }
+        // --- 新增：處理滑鼠放開 (用於結束拖曳) ---
+        else if (const auto* mouseReleased = event->getIf<sf::Event::MouseButtonReleased>()) {
+            if (mouseReleased->button == sf::Mouse::Button::Left) {
+                sf::Vector2f mousePos(static_cast<float>(mouseReleased->position.x), static_cast<float>(mouseReleased->position.y));
+                if (m_inventoryPanel) {
+                    m_inventoryPanel->handleMouseRelease(mousePos);
+                }
             }
         }
     }
@@ -141,7 +162,6 @@ void Game::handleMapClick(sf::Vector2f mousePos) {
                 }
             }
 
-            // 修改：這裡只傳 4 個參數 (移除 texture)
             std::unique_ptr<Tower> newTower;
             switch (type) {
             case TowerType::Basic:
@@ -196,6 +216,10 @@ void Game::update(sf::Time dt) {
         }
     }
     m_upgradePanel->update(dt);
+
+    if (m_inventoryPanel) {
+        m_inventoryPanel->update(dt);
+    }
 
     for (auto& enemy : m_enemies) enemy->update(dt);
     for (auto& tower : m_towers) tower->update(dt);
