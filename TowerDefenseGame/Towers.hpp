@@ -3,21 +3,20 @@
 #include "Tower.hpp"
 #include "TowerData.hpp"
 #include "Utils.hpp"
-#include "PlayerStats.hpp" 
+#include "PlayerStats.hpp"
 #include <cstdint>
 #include <iostream>
 
-// 1. Basic Tower
+// 1. Basic Tower: 基礎塔
 class BasicTower : public Tower {
 public:
-    // 移除 texture 參數
-    BasicTower(sf::Vector2f pos, auto& e, auto& p, const PlayerStats& s)
+    BasicTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
+        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         const auto& info = TowerData::INFO.at(TowerType::Basic);
         m_name = info.name;
         m_price = info.price;
-        // 改回設定顏色
         m_shape.setFillColor(info.color);
 
         m_range = 150.f;
@@ -30,20 +29,43 @@ protected:
         auto target = findTarget(m_range);
         if (target) {
             bool isFire = false;
+            bool isIce = false;
+            bool isExplosive = false;
+
+            // --- 1. 火焰寶石 (機率: 10 + 5 * Level %) ---
             if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
                 int chance = 10 + 5 * m_level;
                 if (rand() % 100 < chance) isFire = true;
             }
-            m_projectiles.push_back(std::make_unique<Projectile>(getPosition(), target, m_damage, isFire));
-            m_currentCooldown = m_cooldownTime;
+
+            // --- 2. 寒冰寶石 (機率: 3%) ---
+            if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
+				int chance = 3 + 2 * m_level;
+                if (rand() % 100 < chance) isIce = true;
+            }
+
+            // --- 3. 爆裂寶石 (機率: 10%) ---
+            if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
+				int chance = 10 + 3 * m_level;
+                if (rand() % 100 < chance) isExplosive = true;
+            }
+
+            // 發射子彈 (傳入所有效果 flag)
+            m_projectiles.push_back(std::make_unique<Projectile>(
+                getPosition(), target, m_enemies, m_damage, isFire, isIce, isExplosive
+            ));
+
+            // 使用 getEffectiveCooldown() 支援風暴寶石加速
+            m_currentCooldown = getEffectiveCooldown();
         }
     }
 };
 
-// 2. Laser Tower
+// 2. Laser Tower: 雷射塔 (直接傷害，無子彈)
 class LaserTower : public Tower {
 public:
-    LaserTower(sf::Vector2f pos, auto& e, auto& p, const PlayerStats& s)
+    LaserTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
+        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         const auto& info = TowerData::INFO.at(TowerType::Laser);
@@ -75,22 +97,43 @@ protected:
     void performAction() override {
         auto target = findTarget(m_range);
         if (target) {
+            // 基礎傷害
             target->takeDamage(m_damage);
-            m_currentCooldown = m_cooldownTime;
+            m_currentCooldown = getEffectiveCooldown(); // 支援風暴寶石
 
-            bool isFire = false;
-            if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
-                int chance = 10 + 5 * m_level;
-                if (rand() % 100 < chance) {
-                    target->applyBurn(5.0f);
-                    isFire = true;
+            bool triggeredEffect = false;
+
+            // --- 寶石效果判定 (直接對敵人作用) ---
+
+            // 1. 火焰
+            if (m_stats.isAccessoryActive(AccessoryType::FireGem) && rand() % 100 < (10 + 5 * m_level)) {
+                target->applyBurn(5.0f);
+                triggeredEffect = true;
+            }
+            // 2. 寒冰
+            if (m_stats.isAccessoryActive(AccessoryType::IceGem) && rand() % 100 < 3) {
+                target->applyStun(1.0f);
+                triggeredEffect = true;
+            }
+            // 3. 爆裂 (雷射觸發爆炸)
+            if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem) && rand() % 100 < 10) {
+                float range = 100.f;
+                int explosionDmg = m_damage * 2;
+                for (const auto& enemy : m_enemies) {
+                    if (enemy->isActive() && Utils::distance(target->getPosition(), enemy->getPosition()) <= range) {
+                        enemy->takeDamage(explosionDmg);
+                    }
                 }
+                triggeredEffect = true;
             }
 
+            // 雷射視覺效果
             m_laserTimer = 0.05f;
             m_laserBeam.clear();
-            sf::Color startColor = isFire ? sf::Color(255, 69, 0) : sf::Color::Red;
-            sf::Color endColor = isFire ? sf::Color::Red : sf::Color::Yellow;
+
+            // 如果觸發特效，雷射變橘色；否則為紅色
+            sf::Color startColor = triggeredEffect ? sf::Color(255, 69, 0) : sf::Color::Red;
+            sf::Color endColor = triggeredEffect ? sf::Color::Red : sf::Color::Yellow;
 
             m_laserBeam.push_back(sf::Vertex{ getPosition(), startColor });
             m_laserBeam.push_back(sf::Vertex{ target->getPosition(), endColor });
@@ -98,11 +141,13 @@ protected:
     }
 };
 
-// 3. Sniper Tower
+// 3. Sniper Tower: 狙擊塔
 class SniperTower : public Tower {
 public:
-    SniperTower(sf::Vector2f pos, auto& e, auto& p, const PlayerStats& s)
-        : Tower(pos, e, p, s) {
+    SniperTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
+        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        : Tower(pos, e, p, s)
+    {
         const auto& info = TowerData::INFO.at(TowerType::Sniper);
         m_name = info.name;
         m_price = info.price;
@@ -117,21 +162,35 @@ protected:
         auto target = findTarget(m_range);
         if (target) {
             bool isFire = false;
+            bool isIce = false;
+            bool isExplosive = false;
+
             if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
-                int chance = 10 + 5 * m_level;
-                if (rand() % 100 < chance) isFire = true;
+                if (rand() % 100 < (10 + 5 * m_level)) isFire = true;
             }
-            m_projectiles.push_back(std::make_unique<Projectile>(getPosition(), target, m_damage, isFire));
-            m_currentCooldown = m_cooldownTime;
+            if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
+                if (rand() % 100 < 3) isIce = true;
+            }
+            if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
+                if (rand() % 100 < 10) isExplosive = true;
+            }
+
+            m_projectiles.push_back(std::make_unique<Projectile>(
+                getPosition(), target, m_enemies, m_damage, isFire, isIce, isExplosive
+            ));
+
+            m_currentCooldown = getEffectiveCooldown(); // 支援風暴寶石
         }
     }
 };
 
-// 4. Slow Tower
+// 4. Slow Tower: 緩速塔
 class SlowTower : public Tower {
 public:
-    SlowTower(sf::Vector2f pos, auto& e, auto& p, const PlayerStats& s)
-        : Tower(pos, e, p, s) {
+    SlowTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
+        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        : Tower(pos, e, p, s)
+    {
         const auto& info = TowerData::INFO.at(TowerType::Slow);
         m_name = info.name;
         m_price = info.price;
@@ -145,23 +204,36 @@ protected:
         bool hitAny = false;
         for (const auto& enemy : m_enemies) {
             if (enemy->isActive() && Utils::distance(getPosition(), enemy->getPosition()) <= m_range) {
+                // 基礎效果：緩速
                 enemy->applySlow(0.5f, 1.0f);
                 hitAny = true;
 
+                // 緩速塔也能觸發寶石效果 (AOE 觸發)
+                // 1. 火焰
                 if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
                     if (rand() % 100 < (10 + 5 * m_level)) enemy->applyBurn(5.0f);
                 }
+                // 2. 寒冰 (雙重控制！)
+                if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
+                    if (rand() % 100 < 3) enemy->applyStun(1.0f);
+                }
+                // 3. 爆裂
+                if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
+                    if (rand() % 100 < 10) enemy->takeDamage(50); // 緩速塔本身沒傷害，給予固定傷害
+                }
             }
         }
-        if (hitAny) m_currentCooldown = m_cooldownTime;
+        if (hitAny) m_currentCooldown = getEffectiveCooldown(); // 支援風暴寶石
     }
 };
 
-// 5. Teleport Tower
+// 5. Teleport Tower: 傳送塔
 class TeleportTower : public Tower {
 public:
-    TeleportTower(sf::Vector2f pos, auto& e, auto& p, const PlayerStats& s)
-        : Tower(pos, e, p, s) {
+    TeleportTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
+        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        : Tower(pos, e, p, s)
+    {
         const auto& info = TowerData::INFO.at(TowerType::Teleport);
         m_name = info.name;
         m_price = info.price;
@@ -175,16 +247,18 @@ protected:
         auto target = findTarget(m_range);
         if (target) {
             target->teleportBack(3);
-            m_currentCooldown = m_cooldownTime;
+            m_currentCooldown = getEffectiveCooldown(); // 支援風暴寶石
         }
     }
 };
 
-// 6. Self Destruct Tower
+// 6. Self Destruct Tower: 自爆塔
 class SelfDestructTower : public Tower {
 public:
-    SelfDestructTower(sf::Vector2f pos, auto& e, auto& p, const PlayerStats& s)
-        : Tower(pos, e, p, s) {
+    SelfDestructTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
+        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        : Tower(pos, e, p, s)
+    {
         const auto& info = TowerData::INFO.at(TowerType::SelfDestruct);
         m_name = info.name;
         m_price = info.price;
@@ -230,6 +304,7 @@ protected:
             }
         }
         if (triggered) {
+            // 自爆傷害
             for (const auto& target : m_enemies) {
                 if (target->isActive() && Utils::distance(getPosition(), target->getPosition()) <= m_explosionRadius) {
                     target->takeDamage(m_damage);

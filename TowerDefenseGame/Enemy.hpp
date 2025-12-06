@@ -22,6 +22,7 @@ class Enemy : public Entity {
     void takeDamage(int damage);
 
     void applyBurn(float duration);
+    void applyStun(float duration);
 
     // Getters
     bool isDead() const { return m_hp <= 0; }
@@ -49,4 +50,7 @@ class Enemy : public Entity {
     bool m_isBurning = false;
     float m_burnTimer = 0.f;
     float m_burnTickTimer = 0.f;
+
+    bool m_isStunned = false;
+    float m_stunTimer = 0.f;
 };

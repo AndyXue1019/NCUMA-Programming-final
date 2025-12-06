@@ -1,27 +1,27 @@
 #include "Projectile.hpp"
-
 #include "Enemy.hpp"
 #include "Utils.hpp"
+#include <iostream> // for debug
 
-Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target, int damage, bool isFire)
-    : m_target(target), m_damage(damage) {
+Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target,
+    const std::vector<std::shared_ptr<Enemy>>& enemies,
+    int damage, bool isFire, bool isIce, bool isExplosive)
+    : m_target(target), m_enemies(enemies), m_damage(damage),
+    m_isFire(isFire), m_isIce(isIce), m_isExplosive(isExplosive)
+{
     m_shape.setRadius(5.f);
-    m_shape.setFillColor(sf::Color::Yellow);
-    m_shape.setOrigin(sf::Vector2f(5.f, 5.f));
+    m_shape.setOrigin({ 5.f, 5.f });
     m_shape.setPosition(startPos);
 
-    if (m_isFire) {
-        m_shape.setFillColor(sf::Color(255, 69, 0)); // 火焰彈變橘紅色
-    }
-    else {
-        m_shape.setFillColor(sf::Color::Yellow);
-    }
+    // 根據效果改變顏色
+    if (m_isExplosive) m_shape.setFillColor(sf::Color(139, 0, 0)); // 深紅
+    else if (m_isIce) m_shape.setFillColor(sf::Color::Cyan);       // 青色
+    else if (m_isFire) m_shape.setFillColor(sf::Color(255, 69, 0)); // 橘紅
+    else m_shape.setFillColor(sf::Color::Yellow);
 }
 
 void Projectile::update(sf::Time dt) {
     auto targetSp = m_target.lock();
-
-    // 如果 targetSp 為空 (敵人已被刪除) 或者 不活躍
     if (!targetSp || !targetSp->isActive()) {
         destroy();
         return;
@@ -31,10 +31,31 @@ void Projectile::update(sf::Time dt) {
     sf::Vector2f direction = targetPos - m_shape.getPosition();
 
     if (Utils::distance(m_shape.getPosition(), targetPos) < 20.f) {
+        // --- 命中處理 ---
+
+        // 1. 基礎傷害
         targetSp->takeDamage(m_damage);
 
-        if (m_isFire) {
-            targetSp->applyBurn(5.0f); // 持續 5 秒
+        // 2. 火焰效果
+        if (m_isFire) targetSp->applyBurn(5.0f);
+
+        // 3. 寒冰效果 (暫停 1 秒)
+        if (m_isIce) targetSp->applyStun(1.0f);
+
+        // 4. 爆裂效果 (小範圍 AOE)
+        if (m_isExplosive) {
+            float range = 100.f; // 爆炸半徑
+            int explosionDmg = m_damage * 2; // 200% 傷害
+
+            for (const auto& enemy : m_enemies) {
+                if (enemy->isActive() && Utils::distance(m_shape.getPosition(), enemy->getPosition()) <= range) {
+                    // 對範圍內敵人造成傷害 (包含目標自己，可能會受到兩次傷害，視設計而定)
+                    // 這裡簡單做：對範圍內「所有」敵人造成爆炸傷
+                    // 如果不想讓主目標受兩次傷，可以判斷 if (enemy != targetSp)
+                    enemy->takeDamage(explosionDmg);
+                }
+            }
+            // 可以加個特效 (這裡略)
         }
 
         destroy();

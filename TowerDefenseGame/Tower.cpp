@@ -1,8 +1,8 @@
 #include "Tower.hpp"
 #include "Utils.hpp"
 #include "PlayerStats.hpp"
+#include "Accessory.hpp"
 
-// 建構子：移除 Texture 參數
 Tower::Tower(sf::Vector2f pos,
     const std::vector<std::shared_ptr<Enemy>>& enemies,
     std::vector<std::unique_ptr<Projectile>>& projectiles,
@@ -11,7 +11,6 @@ Tower::Tower(sf::Vector2f pos,
     m_projectiles(projectiles),
     m_stats(stats)
 {
-    // 設定形狀大小與原點
     m_shape.setSize({ 40.f, 40.f });
     m_shape.setOrigin({ 20.f, 20.f });
     m_shape.setPosition(pos);
@@ -24,6 +23,15 @@ void Tower::update(sf::Time dt) {
     if (m_currentCooldown <= 0.f) {
         performAction();
     }
+}
+
+float Tower::getEffectiveCooldown() const {
+    float baseCooldown = m_cooldownTime;
+
+    if (m_stats.isAccessoryActive(AccessoryType::StormGem)) {
+        return baseCooldown / 1.5f;
+    }
+    return baseCooldown;
 }
 
 void Tower::draw(sf::RenderWindow& window) {
