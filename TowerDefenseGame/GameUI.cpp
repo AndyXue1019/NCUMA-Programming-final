@@ -3,6 +3,7 @@
 #include <format>  // C++20
 
 #include "Config.hpp"
+#include "TowerData.hpp"
 
 GameUI::GameUI(const sf::Font& font, PlayerStats& stats)
     : m_font(font), m_playerStats(stats), m_infoText(font) {

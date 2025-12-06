@@ -3,7 +3,14 @@
 #include <map>
 #include <string>
 
-#include "Tower.hpp"  // TowerType enum
+enum class TowerType {
+    Basic,
+    Laser,
+    Sniper,
+    Slow,
+    Teleport,
+    SelfDestruct
+};
 
 struct TowerInfo {
     std::string name;
@@ -13,11 +20,11 @@ struct TowerInfo {
 };
 
 namespace TowerData {
-inline const std::map<TowerType, TowerInfo> INFO = {
-    {TowerType::Basic, {"Basic", 50, 1, sf::Color::White}},
-    {TowerType::Laser, {"Laser", 120, 1, sf::Color::Red}},
-    {TowerType::Sniper, {"Sniper", 200, 2, sf::Color::Green}},
-    {TowerType::Slow, {"Slow", 150, 2, sf::Color(0, 255, 255)}},  // Cyan
-    {TowerType::Teleport, {"Teleport", 300, 3, sf::Color::Magenta}},
-    {TowerType::SelfDestruct, {"Mine", 100, 1, sf::Color(50, 50, 50)}}};  // Dark Gray
+    inline const std::map<TowerType, TowerInfo> INFO = {
+        {TowerType::Basic, {"Basic", 50, 1, sf::Color::White}},
+        {TowerType::Laser, {"Laser", 120, 1, sf::Color::Red}},
+        {TowerType::Sniper, {"Sniper", 200, 2, sf::Color::Green}},
+        {TowerType::Slow, {"Slow", 150, 2, sf::Color(0, 255, 255)}},  // Cyan
+        {TowerType::Teleport, {"Teleport", 300, 3, sf::Color::Magenta}},
+        {TowerType::SelfDestruct, {"Mine", 100, 1, sf::Color(50, 50, 50)}}};  // Dark Gray
 }

@@ -1,21 +1,21 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <map> 
-#include <memory> 
+#include <map>
+#include <memory>
 #include <optional>
 #include <vector>
 
 #include "Config.hpp"
 #include "Enemy.hpp"
 #include "GameUI.hpp"
+#include "InventoryPanel.hpp"
+#include "Loot.hpp"
 #include "Map.hpp"
 #include "PlayerStats.hpp"
 #include "Projectile.hpp"
 #include "Tower.hpp"
-#include "WaveManager.hpp"
-#include "Loot.hpp"
-#include "InventoryPanel.hpp"
 #include "UpgradePanel.hpp"
+#include "WaveManager.hpp"
 
 enum class GameState { Shop, WaveRunning, GameOver };
 
@@ -62,8 +62,6 @@ private:
 
     void loadResources();
     void updateUI();
-
-    TowerType m_selectedTowerType;
 
     void handleShopClick(sf::Vector2f mousePos);
     void handleMapClick(sf::Vector2f mousePos);

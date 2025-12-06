@@ -13,8 +13,7 @@ Game::Game()
     m_map(sf::Vector2u(static_cast<unsigned>(Config::WINDOW_WIDTH / Config::GRID_SIZE),
         static_cast<unsigned>(Config::WINDOW_HEIGHT / Config::GRID_SIZE)),
         static_cast<float>(Config::GRID_SIZE)),
-    m_uiText(m_font),
-    m_selectedTowerType(TowerType::Basic) {
+    m_uiText(m_font) {
     m_window.setFramerateLimit(Config::FRAME_RATE_LIMIT);
 
     loadResources();

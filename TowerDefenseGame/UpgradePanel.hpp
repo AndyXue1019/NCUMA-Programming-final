@@ -1,9 +1,10 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <format>
+
+#include "Config.hpp"
 #include "Tower.hpp"
 #include "PlayerStats.hpp"
-#include "Config.hpp"
 
 class UpgradePanel {
 public:

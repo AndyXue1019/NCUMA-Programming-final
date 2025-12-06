@@ -1,6 +1,6 @@
 #pragma once
-#include <string>
 #include <SFML/Graphics.hpp>
+#include <string>
 
 enum class AccessoryType {
     // updating

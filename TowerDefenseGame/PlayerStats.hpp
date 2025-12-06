@@ -1,8 +1,9 @@
 #pragma once
 #include <map>
 #include <vector>
-#include "Config.hpp"      // 為了讀取 TowerType
+
 #include "Accessory.hpp"   // 飾品定義
+#include "TowerData.hpp"   // TowerType
 
 struct PlayerStats {
     int gold = 200;

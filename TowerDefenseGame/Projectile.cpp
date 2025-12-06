@@ -1,7 +1,9 @@
 #include "Projectile.hpp"
+
+#include <iostream> // for debug
+
 #include "Enemy.hpp"
 #include "Utils.hpp"
-#include <iostream> // for debug
 
 Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target,
     const std::vector<std::shared_ptr<Enemy>>& enemies,

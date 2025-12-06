@@ -1,6 +1,7 @@
+#include "Tower.hpp"
+
 #include "Accessory.hpp"
 #include "PlayerStats.hpp"
-#include "Tower.hpp"
 #include "Utils.hpp"
 
 Tower::Tower(sf::Vector2f pos,
