@@ -1,9 +1,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <map> 
 #include <memory> 
 #include <optional>
 #include <vector>
-#include <map> 
 
 #include "Config.hpp"
 #include "Enemy.hpp"

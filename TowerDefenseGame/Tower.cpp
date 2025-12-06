@@ -1,7 +1,7 @@
+#include "Accessory.hpp"
+#include "PlayerStats.hpp"
 #include "Tower.hpp"
 #include "Utils.hpp"
-#include "PlayerStats.hpp"
-#include "Accessory.hpp"
 
 Tower::Tower(sf::Vector2f pos,
     const std::vector<std::shared_ptr<Enemy>>& enemies,

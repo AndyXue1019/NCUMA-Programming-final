@@ -6,6 +6,7 @@
 #include "Config.hpp"
 #include "Map.hpp"
 #include "Towers.hpp"
+#include "Utils.hpp"
 
 Game::Game()
     : m_window(sf::VideoMode({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }), "Tower Defense Game"),
@@ -232,8 +233,11 @@ void Game::update(sf::Time dt) {
                 m_playerStats.addGold(enemy->getBounty());
                 m_playerStats.addExp(enemy->getExp());
                 m_waveManager->notifyEnemyDeath();
-                if (rand() % 100 < 5) {
-                    m_loots.push_back(std::make_unique<Loot>(enemy->getPosition(), AccessoryType::FireGem));
+                if (Utils::m_rnad() < 5) {
+                    m_loots.push_back(std::make_unique<Loot>(
+                        enemy->getPosition(),
+                        static_cast<AccessoryType>(Utils::m_rnad() % 4 + 1)
+                    ));
                 }
             }
             else {
