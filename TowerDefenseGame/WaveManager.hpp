@@ -36,6 +36,7 @@ class WaveManager {
 
     int m_currentWaveIndex = 0;  // 0-19 (代表 Wave 1-20)
     bool m_spawning = false;
+    bool m_isRandomWave = false;
 
     // 生成計時
     float m_spawnTimer = 0.f;

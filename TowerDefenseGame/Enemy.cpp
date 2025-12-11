@@ -2,8 +2,10 @@
 #include "Utils.hpp"
 
 Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type)
-    : m_path(path) {
+    : m_path(path), m_type(type){
     // 根據類型設定數值與外觀
+    m_shape.setPointCount(30);
+
     switch (type) {
     case EnemyType::Normal:
         m_speed = 100.f;
@@ -29,6 +31,27 @@ Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type)
         m_shape.setRadius(20.f);
         m_shape.setFillColor(sf::Color(150, 0, 0));  // 深紅
         break;
+    case EnemyType::Triangle:
+        m_speed = 100.f * 1.5f; // 普通敵人的 150% 速度
+        m_maxHp = static_cast<int>(50 * 0.75f); // 普通敵人的 75% 血量 (~37)
+        m_bounty = 12;
+        m_expReward = 6;
+        m_shape.setRadius(15.f);
+        m_shape.setPointCount(3); // 設定為三角形
+        m_shape.setFillColor(sf::Color(0, 255, 100)); // 亮綠色
+        break;
+
+        // [新增] 方形敵人
+    case EnemyType::Square:
+        m_speed = 100.f * 0.5f; // 普通敵人的 50% 速度
+        m_maxHp = 50; // 假設血量跟普通敵人一樣 (或是你想設高一點也可以)
+        m_bounty = 15;
+        m_expReward = 8;
+        m_shape.setRadius(18.f);
+        m_shape.setPointCount(4); // 設定為正方形
+        m_shape.setFillColor(sf::Color(100, 100, 255)); // 藍紫色
+        break;
+    
     case EnemyType::MiniBoss:  // Wave 5, 10, 15
         m_speed = 60.f;
         m_maxHp = 500;
@@ -95,6 +118,41 @@ void Enemy::update(sf::Time dt) {
 
         if (m_burnTimer <= 0.f) {
             m_isBurning = false;
+        }
+    }
+
+    if (m_type == EnemyType::Square && !m_isStunned) { // 暈眩時不能衝刺
+        if (m_isDashing) {
+            // 正在衝刺中：倒數計時
+            m_dashDurationTimer -= dt.asSeconds();
+            if (m_dashDurationTimer <= 0.f) {
+                // 衝刺結束，恢復原本速度 (考慮緩速狀態)
+                m_isDashing = false;
+                if (m_isSlowed) {
+                    // 如果原本被緩速，恢復成緩速後的速度
+                    // 這裡假設緩速效果是持續的，你可以根據你的 SlowTower 邏輯調整
+                    // 簡單寫法：重新計算一次當前速度
+                    m_currentSpeed = m_baseSpeed * 0.5f; // 假設緩速是 0.5倍
+                }
+                else {
+                    m_currentSpeed = m_baseSpeed;
+                }
+            }
+        }
+        else {
+            // 沒在衝刺：冷卻並檢查機率
+            m_dashCheckTimer -= dt.asSeconds();
+            if (m_dashCheckTimer <= 0.f) {
+                // 每 2 秒檢查一次是否要衝刺
+                m_dashCheckTimer = 2.0f;
+
+                // 50% 機率
+                if (Utils::m_rnad() < 50) {
+                    m_isDashing = true;
+                    m_dashDurationTimer = 0.5f; // 衝刺持續 0.5 秒
+                    m_currentSpeed = 500.f;     // 速度變為 500
+                }
+            }
         }
     }
 
