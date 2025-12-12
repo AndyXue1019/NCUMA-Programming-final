@@ -235,7 +235,7 @@ void Game::update(sf::Time dt) {
                 if (Utils::m_rand() < 5) {
                     m_loots.push_back(std::make_unique<Loot>(
                         enemy->getPosition(),
-                        static_cast<AccessoryType>(Utils::m_rand() % 4 + 1)
+                        static_cast<AccessoryType>(Utils::m_rand() % 5 + 1)
                     ));
                 }
             }

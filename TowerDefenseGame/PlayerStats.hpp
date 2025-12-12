@@ -2,8 +2,8 @@
 #include <map>
 #include <vector>
 
-#include "Accessory.hpp"   // 飾品定義
-#include "TowerData.hpp"   // TowerType
+#include "Accessory.hpp"
+#include "TowerData.hpp"
 
 struct PlayerStats {
     int gold = 200;
@@ -31,7 +31,6 @@ struct PlayerStats {
         return activeAccessory == type;
     }
 
-    // [補回這個函式] 檢查背包是否擁有某種飾品
     bool hasAccessory(AccessoryType type) const {
         for (auto t : accessories) {
             if (t == type) return true;
@@ -39,7 +38,12 @@ struct PlayerStats {
         return false;
     }
 
-    void addGold(int amount) { gold += amount; }
+    void addGold(int amount) {
+        if (isAccessoryActive(AccessoryType::WealthDiamond)) {
+            amount *= 2;
+        }
+        gold += amount;
+    }
     void spendGold(int amount) { gold -= amount; }
     void addExp(int amount) {
         experience += amount;

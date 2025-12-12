@@ -8,7 +8,8 @@ enum class AccessoryType {
     FireGem,
     IceGem,
     StormGem,
-    ExplosiveGem
+    ExplosiveGem,
+    WealthDiamond
 };
 
 struct Accessory {
@@ -55,6 +56,14 @@ namespace AccessoryData {
                 "Chance to deal 200%\nAOE damage.", 
                 sf::Color(139, 0, 0),
                 20 
+            };
+        case AccessoryType::WealthDiamond:
+            return {
+                type,
+                "Wealth Diamond",
+                "Double ALL gold gained\n(Enemies, Sell, etc.)",
+                sf::Color(100, 220, 255), 
+                50 
             };
         default:
             return { AccessoryType::None, "", "", sf::Color::White, 0};
