@@ -1,6 +1,7 @@
+#include "WaveManager.hpp"
+
 #include <iostream>
 
-#include "WaveManager.hpp"
 #include "Utils.hpp"
 
 WaveManager::WaveManager(std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<sf::Vector2f>& path, PlayerStats& stats)

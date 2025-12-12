@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
+#include "Config.hpp"
 #include "Enemy.hpp"
 #include "Entity.hpp"
 #include "Projectile.hpp"
 #include "Utils.hpp"
-#include "Config.hpp" 
 
 // «e¦V«Å§i
 struct PlayerStats;

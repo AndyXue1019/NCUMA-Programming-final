@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <format>
 #include <cmath> 
+#include <format>
 
 #include "Config.hpp"
 #include "Tower.hpp"

@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+
 #include "Entity.hpp"
 
 enum class EnemyType {

@@ -1,7 +1,7 @@
 #pragma once
-#include "Entity.hpp"
 #include "Accessory.hpp"
 #include "Config.hpp"
+#include "Entity.hpp"
 #include "Utils.hpp"
 
 class Loot : public Entity {

@@ -1,12 +1,13 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <vector>
-#include <string>
+#include <cstdint> // for std::uint8_t
 #include <format>
-#include <cstdint> // 新增：為了使用 std::uint8_t
-#include "PlayerStats.hpp"
-#include "Config.hpp"
+#include <string>
+#include <vector>
+
 #include "Accessory.hpp"
+#include "Config.hpp"
+#include "PlayerStats.hpp"
 
 class InventoryPanel {
 public:
