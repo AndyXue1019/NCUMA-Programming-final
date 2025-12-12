@@ -40,8 +40,6 @@ Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type)
         m_shape.setPointCount(3); // 設定為三角形
         m_shape.setFillColor(sf::Color(0, 255, 100)); // 亮綠色
         break;
-
-        // [新增] 方形敵人
     case EnemyType::Square:
         m_speed = 100.f * 0.5f; // 普通敵人的 50% 速度
         m_maxHp = 50; // 假設血量跟普通敵人一樣 (或是你想設高一點也可以)
@@ -51,7 +49,6 @@ Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type)
         m_shape.setPointCount(4); // 設定為正方形
         m_shape.setFillColor(sf::Color(100, 100, 255)); // 藍紫色
         break;
-    
     case EnemyType::MiniBoss:  // Wave 5, 10, 15
         m_speed = 60.f;
         m_maxHp = 500;

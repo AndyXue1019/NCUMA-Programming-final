@@ -15,7 +15,8 @@ public:
         std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
-        const auto& info = TowerData::INFO.at(TowerType::Basic);
+        m_type = TowerType::Basic;
+        const auto& info = TowerData::INFO.at(m_type);
         m_name = info.name;
         m_price = info.price;
         m_shape.setFillColor(info.color);
@@ -69,7 +70,8 @@ public:
         std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
-        const auto& info = TowerData::INFO.at(TowerType::Laser);
+        m_type = TowerType::Laser;
+        const auto& info = TowerData::INFO.at(m_type);
         m_name = info.name;
         m_price = info.price;
         m_shape.setFillColor(info.color);
@@ -149,7 +151,8 @@ public:
         std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
-        const auto& info = TowerData::INFO.at(TowerType::Sniper);
+        m_type = TowerType::Sniper;
+        const auto& info = TowerData::INFO.at(m_type);
         m_name = info.name;
         m_price = info.price;
         m_shape.setFillColor(info.color);
@@ -192,7 +195,8 @@ public:
         std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
-        const auto& info = TowerData::INFO.at(TowerType::Slow);
+        m_type = TowerType::Slow;
+        const auto& info = TowerData::INFO.at(m_type);
         m_name = info.name;
         m_price = info.price;
         m_shape.setFillColor(info.color);
@@ -235,7 +239,8 @@ public:
         std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
-        const auto& info = TowerData::INFO.at(TowerType::Teleport);
+        m_type = TowerType::Teleport;
+        const auto& info = TowerData::INFO.at(m_type);
         m_name = info.name;
         m_price = info.price;
         m_shape.setFillColor(info.color);
@@ -245,11 +250,14 @@ public:
     }
 protected:
     void performAction() override {
-        auto target = findTarget(m_range);
-        if (target) {
-            target->teleportBack(3);
-            m_currentCooldown = getEffectiveCooldown(); // 支援風暴寶石
-        }
+        // 根據等級傳送多個目標回去
+        for (int i = 0; i < m_level; ++i) {
+           auto target = findTarget(m_range);
+               if (target) {
+                   target->teleportBack(3);
+                   m_currentCooldown = getEffectiveCooldown(); // 支援風暴寶石
+               }
+         }
     }
 };
 
@@ -260,13 +268,14 @@ public:
         std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
         : Tower(pos, e, p, s)
     {
-        const auto& info = TowerData::INFO.at(TowerType::SelfDestruct);
+        m_type = TowerType::SelfDestruct;
+        const auto& info = TowerData::INFO.at(m_type);
         m_name = info.name;
         m_price = info.price;
         m_shape.setFillColor(info.color);
 
         m_range = 80.f;
-        m_damage = 500;
+        m_damage = 100;
         m_cooldownTime = 0.1f;
 
         m_shockwave.setRadius(10.f);

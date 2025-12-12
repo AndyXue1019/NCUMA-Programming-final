@@ -8,6 +8,7 @@
 #include "Enemy.hpp"
 #include "Entity.hpp"
 #include "Projectile.hpp"
+#include "TowerData.hpp"
 #include "Utils.hpp"
 
 // 前向宣告
@@ -34,10 +35,10 @@ public:
     int getNextLevelDamage() const;
     bool isMaxLevel() const { return m_level >= 5; }
 
-    // [修正] 新增這個函式的宣告
     float getEffectiveCooldown() const;
 
     std::string getName() const { return m_name; }
+    TowerType getType() const { return m_type; }
     int getDamage() const { return m_damage; }
     int getLevel() const { return m_level; }
     int getPrice() const { return m_price; }
@@ -53,6 +54,7 @@ protected:
     const PlayerStats& m_stats;
 
     std::string m_name;
+    TowerType m_type;
     float m_range = 150.f;
     float m_cooldownTime = 1.0f;
     float m_currentCooldown = 0.f;

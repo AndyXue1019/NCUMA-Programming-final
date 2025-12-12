@@ -8,28 +8,27 @@
 #include "PlayerStats.hpp"
 
 class UpgradePanel {
-public:
+   public:
     UpgradePanel(const sf::Font& font)
         : m_font(font),
-        m_infoText(font),
-        m_btnLabel(font),
-        m_btnCostLabel(font),
-        m_btnSellLabel(font),      // [新增]
-        m_btnSellPriceLabel(font)  // [新增]
-    {
+          m_infoText(font),
+          m_btnUpLabel(font),
+          m_btnUpPriceLabel(font),
+          m_btnSellLabel(font),
+          m_btnSellPriceLabel(font) {
         // 面板背景 (左側 250px 寬)
-        m_bg.setSize({ 250.f, static_cast<float>(Config::WINDOW_HEIGHT) });
-        m_bg.setFillColor(sf::Color(40, 44, 52, 230)); // 深色半透明
+        m_bg.setSize({250.f, static_cast<float>(Config::WINDOW_HEIGHT)});
+        m_bg.setFillColor(sf::Color(40, 44, 52, 230));  // 深色半透明
         m_bg.setOutlineThickness(2.f);
         m_bg.setOutlineColor(sf::Color::White);
 
         // 初始位置在畫面外 (左側)
         m_currentX = -250.f;
-        m_bg.setPosition({ m_currentX, 0.f });
+        m_bg.setPosition({m_currentX, 0.f});
 
         initText();
         initButton();
-        initSellButton(); // [新增] 初始化賣出按鈕
+        initSellButton();
     }
 
     void update(sf::Time dt) {
@@ -41,31 +40,30 @@ public:
         if (m_currentX < targetX) {
             m_currentX += moveAmount;
             if (m_currentX > targetX) m_currentX = targetX;
-        }
-        else if (m_currentX > targetX) {
+        } else if (m_currentX > targetX) {
             m_currentX -= moveAmount;
             if (m_currentX < targetX) m_currentX = targetX;
         }
 
-        m_bg.setPosition({ m_currentX, 0.f });
-        updatePositions(); // 更新文字和按鈕位置跟隨背景
+        m_bg.setPosition({m_currentX, 0.f});
+        updatePositions();  // 更新文字和按鈕位置跟隨背景
     }
 
-    void draw(sf::RenderWindow& window) {
-        if (m_currentX <= -250.f) return; // 完全縮進去就不畫
+    void draw(sf::RenderWindow& window, const PlayerStats& stats) {
+        if (m_currentX <= -250.f) return;  // 完全縮進去就不畫
 
         window.draw(m_bg);
 
         if (m_selectedTower) {
-            updateInfoText();
+            updateInfoText(stats);
             window.draw(m_infoText);
 
             // 繪製升級按鈕
-            window.draw(m_btnShape);
-            window.draw(m_btnLabel);
-            window.draw(m_btnCostLabel);
+            window.draw(m_btnUpShape);
+            window.draw(m_btnUpLabel);
+            window.draw(m_btnUpPriceLabel);
 
-            // [新增] 繪製賣出按鈕
+            // 繪製賣出按鈕
             window.draw(m_btnSellShape);
             window.draw(m_btnSellLabel);
             window.draw(m_btnSellPriceLabel);
@@ -82,7 +80,7 @@ public:
         if (!m_selectedTower) return false;
 
         // 1. 檢查升級按鈕
-        if (m_btnShape.getGlobalBounds().contains(mousePos)) {
+        if (m_btnUpShape.getGlobalBounds().contains(mousePos)) {
             if (m_selectedTower->isMaxLevel()) return true;
 
             int cost = m_selectedTower->getUpgradeCost();
@@ -93,7 +91,7 @@ public:
             return true;
         }
 
-        // 2. [新增] 檢查賣出按鈕
+        // 2. 檢查賣出按鈕
         if (m_btnSellShape.getGlobalBounds().contains(mousePos)) {
             // 計算總價值 (公式：基礎價 + 歷次升級總和)
             int level = m_selectedTower->getLevel();
@@ -104,9 +102,9 @@ public:
             // 返還 80%
             int refund = static_cast<int>(totalSpent * 0.8);
 
-            stats.addGold(refund);      // 加錢
-            m_selectedTower->destroy(); // 銷毀塔 (Game loop 會自動移除)
-            m_selectedTower = nullptr;  // 關閉面板
+            stats.addGold(refund);       // 加錢
+            m_selectedTower->destroy();  // 銷毀塔 (Game loop 會自動移除)
+            m_selectedTower = nullptr;   // 關閉面板
             return true;
         }
 
@@ -118,7 +116,7 @@ public:
         return false;
     }
 
-private:
+   private:
     const sf::Font& m_font;
     sf::RectangleShape m_bg;
     Tower* m_selectedTower = nullptr;
@@ -127,11 +125,11 @@ private:
     sf::Text m_infoText;
 
     // 升級按鈕
-    sf::RectangleShape m_btnShape;
-    sf::Text m_btnLabel;
-    sf::Text m_btnCostLabel;
+    sf::RectangleShape m_btnUpShape;
+    sf::Text m_btnUpLabel;
+    sf::Text m_btnUpPriceLabel;
 
-    // [新增] 賣出按鈕元件
+    // 賣出按鈕元件
     sf::RectangleShape m_btnSellShape;
     sf::Text m_btnSellLabel;
     sf::Text m_btnSellPriceLabel;
@@ -143,23 +141,22 @@ private:
     }
 
     void initButton() {
-        m_btnShape.setSize({ 200.f, 60.f });
-        m_btnShape.setFillColor(sf::Color(0, 150, 0)); // 綠色
+        m_btnUpShape.setSize({200.f, 60.f});
+        m_btnUpShape.setFillColor(sf::Color(0, 150, 0));  // 綠色
 
-        m_btnLabel.setFont(m_font);
-        m_btnLabel.setString("UPGRADE");
-        m_btnLabel.setCharacterSize(24);
-        m_btnLabel.setFillColor(sf::Color::White);
+        m_btnUpLabel.setFont(m_font);
+        m_btnUpLabel.setString("UPGRADE");
+        m_btnUpLabel.setCharacterSize(24);
+        m_btnUpLabel.setFillColor(sf::Color::White);
 
-        m_btnCostLabel.setFont(m_font);
-        m_btnCostLabel.setCharacterSize(18);
-        m_btnCostLabel.setFillColor(sf::Color::Yellow);
+        m_btnUpPriceLabel.setFont(m_font);
+        m_btnUpPriceLabel.setCharacterSize(18);
+        m_btnUpPriceLabel.setFillColor(sf::Color::Yellow);
     }
 
-
     void initSellButton() {
-        m_btnSellShape.setSize({ 200.f, 60.f });
-        m_btnSellShape.setFillColor(sf::Color(180, 50, 50)); // 紅色 (代表危險/刪除)
+        m_btnSellShape.setSize({200.f, 60.f});
+        m_btnSellShape.setFillColor(sf::Color(180, 50, 50));  // 紅色 (代表危險/刪除)
         m_btnSellShape.setOutlineThickness(1.f);
         m_btnSellShape.setOutlineColor(sf::Color::Black);
 
@@ -170,51 +167,68 @@ private:
 
         m_btnSellPriceLabel.setFont(m_font);
         m_btnSellPriceLabel.setCharacterSize(18);
-        m_btnSellPriceLabel.setFillColor(sf::Color::Yellow); // 顯示返還金額
+        m_btnSellPriceLabel.setFillColor(sf::Color::Yellow);  // 顯示返還金額
     }
 
     void updatePositions() {
         float padding = 25.f;
-        m_infoText.setPosition({ m_currentX + padding, 50.f });
+        m_infoText.setPosition({m_currentX + padding, 50.f});
 
         // 升級按鈕
         float btnY = 300.f;
-        m_btnShape.setPosition({ m_currentX + padding, btnY });
-        m_btnLabel.setPosition({ m_currentX + padding + 40.f, btnY + 5.f });
-        m_btnCostLabel.setPosition({ m_currentX + padding + 60.f, btnY + 35.f });
+        m_btnUpShape.setPosition({m_currentX + padding, btnY});
+        m_btnUpLabel.setPosition({m_currentX + padding + 40.f, btnY + 5.f});
+        m_btnUpPriceLabel.setPosition({m_currentX + padding + 60.f, btnY + 35.f});
 
-        //售出按鈕
+        // 售出按鈕
         float sellBtnY = btnY + 60.f + 20.f;
-        m_btnSellShape.setPosition({ m_currentX + padding, sellBtnY });
-        m_btnSellLabel.setPosition({ m_currentX + padding + 70.f, sellBtnY + 5.f });
-        m_btnSellPriceLabel.setPosition({ m_currentX + padding + 60.f, sellBtnY + 35.f });
+        m_btnSellShape.setPosition({m_currentX + padding, sellBtnY});
+        m_btnSellLabel.setPosition({m_currentX + padding + 70.f, sellBtnY + 5.f});
+        m_btnSellPriceLabel.setPosition({m_currentX + padding + 60.f, sellBtnY + 35.f});
     }
 
-    void updateInfoText() {
+    void updateInfoText(const PlayerStats& stats) {
         if (!m_selectedTower) return;
 
-        std::string content = std::format(
-            "Type: {}\n\nLevel: {} / 5\n\nDamage: {}\n(+{})",
-            m_selectedTower->getName(),
-            m_selectedTower->getLevel(),
-            m_selectedTower->getDamage(),
-            m_selectedTower->isMaxLevel() ? 0 : (m_selectedTower->getNextLevelDamage() - m_selectedTower->getDamage())
-        );
+        std::string content;
+
+        auto type = m_selectedTower->getType();
+        if (type == TowerType::Slow or type == TowerType::Teleport) {
+            content = std::format(
+                "Type: {}\n\nLevel: {} / 5\n\n(+{})",
+                m_selectedTower->getName(),
+                m_selectedTower->getLevel(),
+                m_selectedTower->isMaxLevel() ? 0 : (m_selectedTower->getNextLevelDamage() - m_selectedTower->getDamage()));
+        } else {
+            content = std::format(
+                "Type: {}\n\nLevel: {} / 5\n\nDamage: {}\n(+{})",
+                m_selectedTower->getName(),
+                m_selectedTower->getLevel(),
+                m_selectedTower->getDamage(),
+                m_selectedTower->isMaxLevel() ? 0 : (m_selectedTower->getNextLevelDamage() - m_selectedTower->getDamage()));
+        }
+
         m_infoText.setString(content);
 
         // 更新升級按鈕狀態
         if (m_selectedTower->isMaxLevel()) {
-            m_btnLabel.setString("MAX LEVEL");
-            m_btnCostLabel.setString("");
-            m_btnShape.setFillColor(sf::Color::Blue); // 滿級變藍色
-        }
-        else {
-            m_btnLabel.setString("UPGRADE");
-            m_btnCostLabel.setString(std::format("-${}", m_selectedTower->getUpgradeCost()));
-            m_btnShape.setFillColor(sf::Color(0, 150, 0));
+            m_btnUpLabel.setString("MAX LEVEL");
+            m_btnUpPriceLabel.setString("");
+            m_btnUpShape.setFillColor(sf::Color::Blue);  // 滿級變藍色
+        } else {
+            int cost = m_selectedTower->getUpgradeCost();
+            m_btnUpLabel.setString("UPGRADE");
+            m_btnUpPriceLabel.setString(std::format("-${}", cost));
+            if (stats.gold >= cost) {
+                m_btnUpPriceLabel.setFillColor(sf::Color::Yellow);
+                m_btnUpShape.setFillColor(sf::Color(0, 150, 0));
+            } else {
+                m_btnUpPriceLabel.setFillColor(sf::Color::Red);
+                m_btnUpShape.setFillColor(sf::Color(100, 100, 100));
+            }
         }
 
-        // [新增] 更新賣出按鈕價格
+        // 更新賣出按鈕價格
         int level = m_selectedTower->getLevel();
         int price = m_selectedTower->getPrice();
         // 計算累積花費

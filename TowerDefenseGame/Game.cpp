@@ -94,7 +94,7 @@ void Game::processEvents() {
                         return; // 如果點在背包上，就結束，不傳給地圖
                     }
                     else {
-                        // [需求達成] 點在背包外面 -> 自動關閉背包
+                        // 點在背包外面 -> 自動關閉背包
                         m_inventoryPanel->close();
                     }
                 }
@@ -281,7 +281,7 @@ void Game::render() {
     for (const auto& proj : m_projectiles) proj->draw(m_window);
     for (const auto& loot : m_loots) loot->draw(m_window);
     m_gameUI->draw(m_window, (m_gameState == GameState::Shop));
-    m_upgradePanel->draw(m_window);
+    m_upgradePanel->draw(m_window, m_playerStats);
     m_inventoryPanel->draw(m_window);
 
     if (m_selectedTower) {
