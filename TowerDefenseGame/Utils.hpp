@@ -9,7 +9,7 @@ namespace Utils {
     inline std::mt19937 m_rnd(rd());
     inline std::uniform_int_distribution<int> m_dist{0, 99};
     // 取得 0-99 的隨機整數 (相當於 rand() % 100)
-    inline int m_rnad() { return m_dist(m_rnd); }
+    inline int m_rand() { return m_dist(m_rnd); }
 
     // 計算向量長度
     inline float length(const sf::Vector2f& v) {

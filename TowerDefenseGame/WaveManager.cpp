@@ -1,6 +1,7 @@
+#include <iostream>
+
 #include "WaveManager.hpp"
 #include "Utils.hpp"
-#include <iostream>
 
 WaveManager::WaveManager(std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<sf::Vector2f>& path, PlayerStats& stats)
     : m_gameEnemies(enemies), m_path(path), m_playerStats(stats) {
@@ -58,8 +59,8 @@ void WaveManager::update(sf::Time dt) {
             EnemyType typeToSpawn = m_currentEnemyType; // 預設值 (給 Boss 用)
 
             if (m_isRandomWave) {
-                // 使用 Utils::m_rnad() (0-99) 來決定機率
-                int r = Utils::m_rnad();
+                // 使用 Utils::m_rand() (0-99) 來決定機率
+                int r = Utils::m_rand();
 
                 // 這裡設定各種類型的出現機率 (你可以自己調整)
                 if (r < 30) {

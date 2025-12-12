@@ -232,10 +232,10 @@ void Game::update(sf::Time dt) {
                 m_playerStats.addGold(enemy->getBounty());
                 m_playerStats.addExp(enemy->getExp());
                 m_waveManager->notifyEnemyDeath();
-                if (Utils::m_rnad() < 5) {
+                if (Utils::m_rand() < 5) {
                     m_loots.push_back(std::make_unique<Loot>(
                         enemy->getPosition(),
-                        static_cast<AccessoryType>(Utils::m_rnad() % 4 + 1)
+                        static_cast<AccessoryType>(Utils::m_rand() % 4 + 1)
                     ));
                 }
             }

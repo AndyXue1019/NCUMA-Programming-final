@@ -147,7 +147,7 @@ void Enemy::update(sf::Time dt) {
                 m_dashCheckTimer = 2.0f;
 
                 // 50% 機率
-                if (Utils::m_rnad() < 50) {
+                if (Utils::m_rand() < 50) {
                     m_isDashing = true;
                     m_dashDurationTimer = 0.5f; // 衝刺持續 0.5 秒
                     m_currentSpeed = 500.f;     // 速度變為 500

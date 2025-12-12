@@ -36,19 +36,19 @@ protected:
             // --- 1. 火焰寶石 (機率: 10 + 5 * Level %) ---
             if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
                 int chance = 10 + 5 * m_level;
-                if (Utils::m_rnad() < chance) isFire = true;
+                if (Utils::m_rand() < chance) isFire = true;
             }
 
             // --- 2. 寒冰寶石 (機率: 3%) ---
             if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
 				int chance = 3 + 2 * m_level;
-                if (Utils::m_rnad() < chance) isIce = true;
+                if (Utils::m_rand() < chance) isIce = true;
             }
 
             // --- 3. 爆裂寶石 (機率: 10%) ---
             if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
 				int chance = 10 + 3 * m_level;
-                if (Utils::m_rnad() < chance) isExplosive = true;
+                if (Utils::m_rand() < chance) isExplosive = true;
             }
 
             // 發射子彈 (傳入所有效果 flag)
@@ -107,17 +107,17 @@ protected:
             // --- 寶石效果判定 (直接對敵人作用) ---
 
             // 1. 火焰
-            if (m_stats.isAccessoryActive(AccessoryType::FireGem) && Utils::m_rnad() < (10 + 5 * m_level)) {
+            if (m_stats.isAccessoryActive(AccessoryType::FireGem) && Utils::m_rand() < (10 + 5 * m_level)) {
                 target->applyBurn(5.0f);
                 triggeredEffect = true;
             }
             // 2. 寒冰
-            if (m_stats.isAccessoryActive(AccessoryType::IceGem) && Utils::m_rnad() < 3) {
+            if (m_stats.isAccessoryActive(AccessoryType::IceGem) && Utils::m_rand() < 3) {
                 target->applyStun(1.0f);
                 triggeredEffect = true;
             }
             // 3. 爆裂 (雷射觸發爆炸)
-            if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem) && Utils::m_rnad() < 10) {
+            if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem) && Utils::m_rand() < 10) {
                 float range = 100.f;
                 int explosionDmg = m_damage * 2;
                 for (const auto& enemy : m_enemies) {
@@ -167,13 +167,13 @@ protected:
             bool isExplosive = false;
 
             if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
-                if (Utils::m_rnad() < (10 + 5 * m_level)) isFire = true;
+                if (Utils::m_rand() < (10 + 5 * m_level)) isFire = true;
             }
             if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
-                if (Utils::m_rnad() < 3) isIce = true;
+                if (Utils::m_rand() < 3) isIce = true;
             }
             if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
-                if (Utils::m_rnad() < 10) isExplosive = true;
+                if (Utils::m_rand() < 10) isExplosive = true;
             }
 
             m_projectiles.push_back(std::make_unique<Projectile>(
@@ -212,15 +212,15 @@ protected:
                 // 緩速塔也能觸發寶石效果 (AOE 觸發)
                 // 1. 火焰
                 if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
-                    if (Utils::m_rnad() < (10 + 5 * m_level)) enemy->applyBurn(5.0f);
+                    if (Utils::m_rand() < (10 + 5 * m_level)) enemy->applyBurn(5.0f);
                 }
                 // 2. 寒冰 (雙重控制！)
                 if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
-                    if (Utils::m_rnad() < 3) enemy->applyStun(1.0f);
+                    if (Utils::m_rand() < 3) enemy->applyStun(1.0f);
                 }
                 // 3. 爆裂
                 if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
-                    if (Utils::m_rnad() < 10) enemy->takeDamage(50); // 緩速塔本身沒傷害，給予固定傷害
+                    if (Utils::m_rand() < 10) enemy->takeDamage(50); // 緩速塔本身沒傷害，給予固定傷害
                 }
             }
         }
