@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <cstdint>
 #include <iostream>
-
+#include <format>
 #include "PlayerStats.hpp"
 #include "Tower.hpp"
 #include "TowerData.hpp"
@@ -342,4 +342,113 @@ protected:
         c.a = static_cast<std::uint8_t>(m_explosionAlpha);
         m_shockwave.setOutlineColor(c);
     }
+};
+
+// 7. Gambler Tower: 終極賭神塔
+class GamblerTower : public Tower {
+public:
+    GamblerTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s) // 注意: 這裡要傳 PlayerStats& 而非 const，因為要加錢
+        : Tower(pos, e, p, s)
+    {
+        m_type = TowerType::Gambler;
+        const auto& info = TowerData::INFO.at(m_type);
+        m_name = info.name;
+        m_price = 0;
+        m_shape.setFillColor(info.color);
+        m_shape.setOutlineColor(sf::Color::White);
+        m_shape.setOutlineThickness(3.f);
+
+        m_range = 300.f;
+        m_cooldownTime = 0.2f; // 射速很快
+
+        // 初始值為一般塔的 3 倍 (Basic Dmg=20) -> 60
+        m_baseDamage = 60;
+    }
+
+    // 覆寫 getDamage，根據金錢計算
+    int getDamage() const {
+        // 每擁有 20 金幣基礎數值 +2
+        int bonus = (m_stats.gold / 20) * 2;
+        return m_baseDamage + bonus;
+    }
+
+    // 覆寫 update 來顯示特殊特效或光環
+    void update(sf::Time dt) override {
+        Tower::update(dt);
+
+        // --- 90% 緩速光環 ---
+        for (const auto& enemy : m_enemies) {
+            if (enemy->isActive() && Utils::distance(getPosition(), enemy->getPosition()) <= m_range) {
+                // 90% 減速 = 速度剩 0.1 倍
+                enemy->applySlow(0.1f, 0.1f); // 持續時間短，因為每幀更新
+            }
+        }
+    }
+
+    // 覆寫 performAction 處理特殊的攻擊機率
+    void performAction() override {
+        auto target = findTarget(m_range);
+        if (target) {
+            // [新增] 每次攻擊獲得 5 金幣 (addGold 內已包含 WealthDiamond 判斷)
+            // 這裡需要 const_cast 或是把 m_stats 改為 non-const reference
+            // 為了方便，我們在 Game.cpp 傳遞時已經將 PlayerStats 改為 reference
+            // 但 Tower 基礎類別存的是 const PlayerStats&，這裡我們偷用 const_cast
+            const_cast<PlayerStats&>(m_stats).addGold(5);
+
+            // TODO: 在這裡彈出 "+$5" 或 "+$10" 的漂浮文字
+            // 由於 Tower 類別無法直接存取 Game 的 UI 層，這裡暫時省略，
+            // 實務上可以傳入一個 callback function 來生成文字。
+
+            // 骰機率
+            int r = Utils::m_rand(); // 0-99
+
+            int finalDmg = getDamage();
+            bool isInstantKill = false;
+            bool isDouble = false;
+            bool isZero = false;
+
+            if (r < 5) {
+                // 5% 秒殺
+                isInstantKill = true;
+            }
+            else if (r < 25) {
+                // 20% 雙倍 (5~24)
+                finalDmg *= 2;
+                isDouble = true;
+            }
+            else if (r < 50) {
+                // 25% 變為 0 (25~49)
+                finalDmg = 0;
+                isZero = true;
+            }
+            // 剩下 50% 正常傷害
+
+            // 發射子彈，但這邊直接結算傷害會比較容易做特效
+            // 或者我們可以修改 Projectile 讓它攜帶特殊 flag
+            // 這裡簡單起見，我們直接對目標造成傷害 (類似 Laser) 
+            // 但為了要有彈道，我們還是生成 Projectile，但要在 Projectile 增加屬性
+
+            // 這裡我們用一個變通方法：生成 Projectile，把計算好的 damage 傳進去
+            // 若是秒殺，傳一個巨大的數字
+
+            if (isInstantKill) finalDmg = 999999;
+
+            // 寶石效果依然有效
+            bool isFire = m_stats.isAccessoryActive(AccessoryType::FireGem) && (Utils::m_rand() < 50);
+            bool isIce = m_stats.isAccessoryActive(AccessoryType::IceGem) && (Utils::m_rand() < 20);
+            bool isExplosive = m_stats.isAccessoryActive(AccessoryType::ExplosiveGem) && (Utils::m_rand() < 20);
+
+            // 為了視覺效果，如果秒殺或雙倍，我們可以傳入特殊的 Projectile 顏色
+            // 這裡先用標準生成
+            m_projectiles.push_back(std::make_unique<Projectile>(
+                getPosition(), target, m_enemies, finalDmg, isFire, isIce, isExplosive
+            ));
+
+            m_currentCooldown = getEffectiveCooldown();
+        }
+    }
+
+private:
+    int m_baseDamage;
 };

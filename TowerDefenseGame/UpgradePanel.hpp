@@ -78,6 +78,7 @@ class UpgradePanel {
     // 處理點擊
     bool handleClick(sf::Vector2f mousePos, PlayerStats& stats) {
         if (!m_selectedTower) return false;
+        if (m_selectedTower->getType() == TowerType::Gambler) return false;
 
         // 1. 檢查升級按鈕
         if (m_btnUpShape.getGlobalBounds().contains(mousePos)) {
@@ -193,6 +194,26 @@ class UpgradePanel {
         std::string content;
 
         auto type = m_selectedTower->getType();
+
+        if (m_selectedTower->getType() == TowerType::Gambler) {
+            std::string content = std::format(
+                "GOD OF GAMBLERS\n\nDamage: {}\n(Scales w/ Gold)\n\nEffects:\n- 90% Slow Aura\n- +$5 per shot\n- RNG DMG",
+                m_selectedTower->getDamage()
+            );
+            m_infoText.setString(content);
+
+            // 隱藏升級與賣出按鈕 (移到畫面外或設為透明)
+            // 這裡簡單做：將按鈕設為不可見或文字清空
+            m_btnUpShape.setFillColor(sf::Color::Transparent);
+            m_btnUpLabel.setString("");
+            m_btnUpPriceLabel.setString("");
+
+            m_btnSellShape.setFillColor(sf::Color::Transparent);
+            m_btnSellLabel.setString("");
+            m_btnSellPriceLabel.setString("");
+            return;
+        }
+
         if (type == TowerType::Slow or type == TowerType::Teleport) {
             content = std::format(
                 "Type: {}\n\nLevel: {} / 5\n\n(+{})",
@@ -234,7 +255,7 @@ class UpgradePanel {
         // 計算累積花費
         int totalSpent = price * (1 + (level * (level - 1)) / 2);
         int refund = static_cast<int>(totalSpent * 0.8);
-
+        m_btnUpShape.setFillColor(sf::Color(0, 150, 0));
         m_btnSellPriceLabel.setString(std::format("+${}", refund));
     }
 };

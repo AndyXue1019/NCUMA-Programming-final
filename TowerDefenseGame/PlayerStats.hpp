@@ -6,7 +6,7 @@
 #include "TowerData.hpp"
 
 struct PlayerStats {
-    int gold = 200;
+    int gold = 999999;
     int lives = 20;
     int level = 1;
     int experience = 0;
@@ -17,6 +17,10 @@ struct PlayerStats {
     // ¹¢«~¨t²Î
     std::vector<AccessoryType> accessories;
     AccessoryType activeAccessory = AccessoryType::None;
+
+	//Extreme Gambler Event
+    bool hasGambler = false;
+    bool hasTriggeredGamblerEvent = false;
 
     void equipAccessory(AccessoryType type) {
         if (activeAccessory == type) {

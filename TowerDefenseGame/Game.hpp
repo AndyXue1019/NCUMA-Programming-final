@@ -17,7 +17,14 @@
 #include "UpgradePanel.hpp"
 #include "WaveManager.hpp"
 
-enum class GameState { Shop, WaveRunning, GameOver };
+// [修正] 加入 Gambler 相關狀態
+enum class GameState {
+    Shop,
+    WaveRunning,
+    GameOver,
+    GamblerEventPrompt,
+    GamblerVideoPlaying
+};
 
 class Game {
 public:
@@ -29,7 +36,6 @@ private:
     void update(sf::Time dt);
     void render();
 
-    // for test use
     void initTestPath();
     std::vector<sf::Vector2f> m_testPath;
     float m_spawnTimer = 0.f;
@@ -41,8 +47,6 @@ private:
     std::vector<std::shared_ptr<Enemy>> m_enemies;
     std::vector<std::unique_ptr<Tower>> m_towers;
     std::vector<std::unique_ptr<Projectile>> m_projectiles;
-
-    // 掉落物與飾品
     std::vector<std::unique_ptr<Loot>> m_loots;
 
     PlayerStats m_playerStats;
@@ -58,11 +62,20 @@ private:
     sf::Font m_font;
     sf::Text m_uiText;
 
-    // 移除 m_towerTextures
+    //宣告順序很重要：Texture 必須在 Sprite 之前
+    sf::Texture m_videoTexture;
+    sf::Sprite m_videoSprite;
+
+    float m_videoTimer = 0.f;
+    float m_videoDuration = 5.0f; // 影片長度
 
     void loadResources();
     void updateUI();
 
     void handleShopClick(sf::Vector2f mousePos);
     void handleMapClick(sf::Vector2f mousePos);
+
+    // 加入這些函式宣告
+    void checkGamblerEvent();
+    void triggerGamblerTransformation();
 };
