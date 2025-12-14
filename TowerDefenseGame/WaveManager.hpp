@@ -16,7 +16,7 @@ public:
     void notifyEnemyDeath() { if (m_enemiesAlive > 0) m_enemiesAlive--; }
     void notifyEnemyReachedEnd() { if (m_enemiesAlive > 0) m_enemiesAlive--; }
 
-    // [修正] 加入此函式
+    //加入此函式
     void forceEndWave() {
         m_spawning = false;
         m_enemiesAlive = 0;

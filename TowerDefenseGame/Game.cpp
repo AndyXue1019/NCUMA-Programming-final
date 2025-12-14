@@ -9,14 +9,14 @@
 #include "Towers.hpp"
 #include "Utils.hpp"
 
-// [修正] SFML 3.0: Sprite 必須在建構子列表初始化
+// SFML 3.0: Sprite 必須在建構子列表初始化
 Game::Game()
     : m_window(sf::VideoMode({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }), "Tower Defense Game"),
     m_map(sf::Vector2u(static_cast<unsigned>(Config::WINDOW_WIDTH / Config::GRID_SIZE),
         static_cast<unsigned>(Config::WINDOW_HEIGHT / Config::GRID_SIZE)),
         static_cast<float>(Config::GRID_SIZE)),
     m_uiText(m_font),
-    m_videoSprite(m_videoTexture) // [關鍵修正] 這裡初始化 Sprite
+    m_videoSprite(m_videoTexture) //這裡初始化 Sprite
 {
     m_window.setFramerateLimit(Config::FRAME_RATE_LIMIT);
 
@@ -30,23 +30,28 @@ Game::Game()
 
     m_waveManager = std::make_unique<WaveManager>(m_enemies, m_testPath, m_playerStats);
 
-    // [修正] 載入影片截圖 (請準備 GodOfGamblers.jpg)
+    //載入影片截圖 ( GodOfGamblers.jpg)
+    //DEBUG
     if (!m_videoTexture.loadFromFile("GodOfGamblers.jpg")) {
-        // 如果找不到圖片，建立一個純黑背景
+        std::cout << "Image NOT found! Creating RED fallback." << std::endl;
         sf::Image img;
-        // [修正] SFML 3.0 改用 resize 取代 create
-        img.resize({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }, sf::Color::Black);
+        img.resize({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }, sf::Color::Red);
         m_videoTexture.loadFromImage(img);
     }
-    // m_videoSprite 已經在初始化列表綁定了，這裡不用再 setTexture
+    else {
+        std::cout << "Image loaded successfully!" << std::endl;
+    }
 
-    // [修正] SFML 3.0 setScale 需要 Vector2f
+    m_videoSprite.setTexture(m_videoTexture);
+
+    // SFML 3.0 setScale 需要 Vector2f
     sf::Vector2u size = m_videoTexture.getSize();
     if (size.x > 0 && size.y > 0) {
         m_videoSprite.setScale({
             static_cast<float>(Config::WINDOW_WIDTH) / size.x,
             static_cast<float>(Config::WINDOW_HEIGHT) / size.y
             });
+        m_videoSprite.setTextureRect(sf::IntRect({ 0, 0 }, { static_cast<int>(size.x), static_cast<int>(size.y) }));
     }
 }
 

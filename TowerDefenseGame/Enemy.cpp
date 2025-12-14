@@ -1,7 +1,7 @@
 #include "Enemy.hpp"
 #include "Utils.hpp"
 
-Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type)
+Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type, bool isGamblerMode)
     : m_path(path), m_type(type){
     // 根據類型設定數值與外觀
     m_shape.setPointCount(30);
@@ -66,6 +66,14 @@ Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type)
         m_shape.setFillColor(sf::Color::Cyan);
         break;
     }
+
+    if (isGamblerMode) {
+        m_speed *= 5.0f;
+        m_maxHp *= 10;
+        m_bounty /= 2;
+		m_expReward /= 2;
+    }
+
     m_baseSpeed = m_speed;
     m_currentSpeed = m_speed;
     m_hp = m_maxHp;

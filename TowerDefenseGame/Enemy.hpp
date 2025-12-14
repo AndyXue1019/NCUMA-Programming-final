@@ -15,7 +15,7 @@ enum class EnemyType {
 
 class Enemy : public Entity {
 public:
-    Enemy(const std::vector<sf::Vector2f>& path, EnemyType type);
+    Enemy(const std::vector<sf::Vector2f>& path, EnemyType type, bool isGamblerMode = false);
 
     void update(sf::Time dt) override;
     void draw(sf::RenderWindow& window) override;

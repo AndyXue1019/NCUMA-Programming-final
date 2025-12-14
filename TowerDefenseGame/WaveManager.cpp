@@ -69,7 +69,7 @@ void WaveManager::update(sf::Time dt) {
                 }
             }
 
-            m_gameEnemies.push_back(std::make_shared<Enemy>(m_path, typeToSpawn));
+            m_gameEnemies.push_back(std::make_shared<Enemy>(m_path, typeToSpawn, m_playerStats.hasGambler));
             m_enemiesToSpawn--;
             m_spawnTimer = 0.f;
         }
