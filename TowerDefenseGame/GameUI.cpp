@@ -7,9 +7,15 @@
 static const sf::Color GOLD_COLOR(255, 215, 0);
 
 GameUI::GameUI(const sf::Font& font, PlayerStats& stats)
-    : m_font(font), m_playerStats(stats), m_infoText(font),
-    // [關鍵修正] 所有 Text 都必須在這裡初始化
-    m_promptText(font), m_txtYes(font), m_txtNo(font)
+    : m_font(font),
+    m_playerStats(stats),
+    m_infoText(font),
+    m_promptText(font),
+    m_txtYes(font),
+    m_txtNo(font),
+    m_hpText(font),
+    m_heartBg(m_heartTexture),
+    m_heartFill(m_heartTexture)
 {
     m_bg.setSize({ static_cast<float>(Config::WINDOW_WIDTH), BAR_HEIGHT });
     m_bg.setPosition({ 0.f, static_cast<float>(Config::WINDOW_HEIGHT) - BAR_HEIGHT });
@@ -20,6 +26,26 @@ GameUI::GameUI(const sf::Font& font, PlayerStats& stats)
     m_infoText.setCharacterSize(18);
     m_infoText.setFillColor(sf::Color::Yellow);
     m_infoText.setPosition({ 20.f, static_cast<float>(Config::WINDOW_HEIGHT) - BAR_HEIGHT + 10.f });
+
+    // 產生愛心並設定位置
+    createHeartTexture();
+
+    // 設定愛心位置 (右下角)
+    float heartX = static_cast<float>(Config::WINDOW_WIDTH) - 130.f;
+    float heartY = static_cast<float>(Config::WINDOW_HEIGHT) - 110.f;
+
+    // Sprite 已經綁定 Texture，這裡只要設定位置顏色
+    m_heartBg.setPosition({ heartX, heartY });
+    m_heartBg.setColor(sf::Color(50, 0, 0, 150)); // 深紅色半透明 (背景)
+
+    m_heartFill.setPosition({ heartX, heartY });
+    m_heartFill.setColor(sf::Color(255, 0, 0));   // 亮紅色 (血量)
+
+    // 血量文字 (顯示在愛心中央)
+    m_hpText.setCharacterSize(20);
+    m_hpText.setFillColor(sf::Color::White);
+    m_hpText.setOutlineColor(sf::Color::Black);
+    m_hpText.setOutlineThickness(1.f);
 
     initButtons();
     initPrompt();
@@ -72,7 +98,6 @@ void GameUI::initPrompt() {
     m_promptText.setCharacterSize(30);
     m_promptText.setFillColor(sf::Color::White);
 
-    // [修正] SFML 3.0: size.x / size.y
     sf::FloatRect textBounds = m_promptText.getLocalBounds();
     m_promptText.setOrigin({ textBounds.size.x / 2, textBounds.size.y / 2 });
     m_promptText.setPosition({ m_promptBg.getPosition().x, m_promptBg.getPosition().y - 50.f });
@@ -183,11 +208,35 @@ void GameUI::updateButtons(bool isShopPhase) {
     }
 }
 
+void GameUI::createHeartTexture() {
+    sf::Image img;
+    // SFML 3.0 使用 resize
+    img.resize({ 100, 100 }, sf::Color::Transparent);
+
+    float cx = 50.f;
+    float cy = 55.f;
+    float scale = 45.f;
+
+    for (unsigned int y = 0; y < 100; ++y) {
+        for (unsigned int x = 0; x < 100; ++x) {
+            float nx = (x - cx) / scale;
+            float ny = (cy - y) / scale;
+
+            float a = nx * nx + ny * ny - 1.f;
+            if (a * a * a - nx * nx * ny * ny * ny <= 0.f) {
+                img.setPixel({ x, y }, sf::Color::White);
+            }
+        }
+    }
+    m_heartTexture.loadFromImage(img);
+    m_heartTexture.setSmooth(true);
+}
+
 void GameUI::draw(sf::RenderWindow& window, bool isShopPhase) {
     window.draw(m_bg);
     std::string stateStr = isShopPhase ? "[SHOP PHASE]" : "[WAVE INCOMING]";
-    std::string info = std::format("{}\nGold: {}\nLives: {}\nLevel: {} Stars",
-        stateStr, m_playerStats.gold, m_playerStats.lives, m_playerStats.level);
+    std::string info = std::format("{}\nGold: {}\nLevel: {} Stars",
+        stateStr, m_playerStats.gold, m_playerStats.level);
     m_infoText.setString(info);
     window.draw(m_infoText);
 
@@ -197,6 +246,33 @@ void GameUI::draw(sf::RenderWindow& window, bool isShopPhase) {
         window.draw(btn.label);
         window.draw(btn.subLabel);
     }
+
+    // 繪製愛心
+    float maxLives = 20.f;
+    float pct = static_cast<float>(m_playerStats.lives) / maxLives;
+    if (pct < 0.f) pct = 0.f;
+    if (pct > 1.f) pct = 1.f;
+
+    window.draw(m_heartBg);
+
+    unsigned int texH = m_heartTexture.getSize().y;
+    unsigned int texW = m_heartTexture.getSize().x;
+
+    int fillHeight = static_cast<int>(texH * pct);
+    int topOffset = texH - fillHeight;
+
+    m_heartFill.setTextureRect(sf::IntRect({ 0, topOffset }, { static_cast<int>(texW), fillHeight }));
+
+    sf::Vector2f basePos = m_heartBg.getPosition();
+    m_heartFill.setPosition({ basePos.x, basePos.y + topOffset });
+
+    window.draw(m_heartFill);
+
+    m_hpText.setString(std::format("{}%", static_cast<int>(pct * 100)));
+    sf::FloatRect textBounds = m_hpText.getLocalBounds();
+    m_hpText.setOrigin({ textBounds.size.x / 2.f, textBounds.size.y / 2.f });
+    m_hpText.setPosition({ basePos.x + 50.f, basePos.y + 50.f });
+    window.draw(m_hpText);
 }
 
 void GameUI::drawGamblerPrompt(sf::RenderWindow& window) {
