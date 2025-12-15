@@ -9,14 +9,14 @@
 #include "Towers.hpp"
 #include "Utils.hpp"
 
-// SFML 3.0: Sprite 必須在建構子列表初始化
 Game::Game()
     : m_window(sf::VideoMode({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }), "Tower Defense Game"),
     m_map(sf::Vector2u(static_cast<unsigned>(Config::WINDOW_WIDTH / Config::GRID_SIZE),
         static_cast<unsigned>(Config::WINDOW_HEIGHT / Config::GRID_SIZE)),
         static_cast<float>(Config::GRID_SIZE)),
     m_uiText(m_font),
-    m_videoSprite(m_videoTexture) //這裡初始化 Sprite
+    m_videoSprite(m_videoTexture), 
+	m_finishSprite(m_finishTexture)
 {
     m_window.setFramerateLimit(Config::FRAME_RATE_LIMIT);
 
@@ -53,10 +53,36 @@ Game::Game()
             });
         m_videoSprite.setTextureRect(sf::IntRect({ 0, 0 }, { static_cast<int>(size.x), static_cast<int>(size.y) }));
     }
+
+    if (!m_finishTexture.loadFromFile("finish.png")) {
+        std::cout << "Failed to load finish.png! Creating fallback." << std::endl;
+        sf::Image img;
+        img.resize({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }, sf::Color::Red);
+        m_finishTexture.loadFromImage(img);
+    }
+
+    // 2. 取得這張圖片專屬的大小 (不要用上面的 size，要用 finishSize)
+    sf::Vector2u finishSize = m_finishTexture.getSize();
+
+    // 3. 設定紋理
+    m_finishSprite.setTexture(m_finishTexture);
+
+    // 4. 設定裁切區域
+    // 必須使用 finishSize (這張圖的尺寸)，絕對不能用 size (那是影片的尺寸)
+    if (finishSize.x > 0 && finishSize.y > 0) {
+        m_finishSprite.setTextureRect(sf::IntRect(
+            { 0, 0 },
+            { static_cast<int>(finishSize.x), static_cast<int>(finishSize.y) }
+        ));
+
+        // 5. 設定縮放比例 (讓圖片填滿視窗)
+        float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / static_cast<float>(finishSize.x);
+        float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / static_cast<float>(finishSize.y);
+        m_finishSprite.setScale({ scaleX, scaleY });
+    }
 }
 
 void Game::loadResources() {
-    // 嘗試載入字型
     if (!m_font.openFromFile("C://Windows/Fonts/arial.ttf")) {
         if (!m_font.openFromFile("arial.ttf")) {
             std::cerr << "Failed to load font!" << std::endl;
@@ -274,6 +300,17 @@ void Game::handleMapClick(sf::Vector2f mousePos) {
 }
 
 void Game::update(sf::Time dt) {
+    if (m_gameState == GameState::GameOver) {
+        return;
+    }
+
+    //  檢查玩家血量是否歸零
+    if (m_playerStats.lives <= 0) {
+        m_gameState = GameState::GameOver;
+        std::cout << "Game Over triggered!" << std::endl;
+        return;
+    }
+
     if (m_gameState == GameState::WaveRunning || m_gameState == GameState::Shop) {
         checkGamblerEvent();
     }
@@ -370,6 +407,9 @@ void Game::render() {
 
     if (m_gameState == GameState::GamblerVideoPlaying) {
         m_window.draw(m_videoSprite);
+    }
+    else if (m_gameState == GameState::GameOver) {
+        m_window.draw(m_finishSprite);
     }
     else {
         m_map.draw(m_window, sf::RenderStates::Default);

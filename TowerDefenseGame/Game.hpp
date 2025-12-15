@@ -66,6 +66,9 @@ private:
     sf::Texture m_videoTexture;
     sf::Sprite m_videoSprite;
 
+    sf::Texture m_finishTexture;
+    sf::Sprite m_finishSprite;
+
     float m_videoTimer = 0.f;
     float m_videoDuration = 5.0f; // 影片長度
 
