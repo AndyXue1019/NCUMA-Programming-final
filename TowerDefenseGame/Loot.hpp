@@ -37,7 +37,6 @@ public:
         window.draw(m_shape);
     }
 
-    // --- 補上這一段 ---
     sf::Vector2f getPosition() const override {
         return m_shape.getPosition();
     }

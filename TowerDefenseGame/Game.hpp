@@ -17,7 +17,7 @@
 #include "UpgradePanel.hpp"
 #include "WaveManager.hpp"
 
-// [修正] 加入 Gambler 相關狀態
+//加入 Gambler 相關狀態
 enum class GameState {
     Shop,
     WaveRunning,
@@ -31,6 +31,7 @@ public:
     Game();
     void run();
 
+    void spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size = 20);
 private:
     void processEvents();
     void update(sf::Time dt);
@@ -62,7 +63,6 @@ private:
     sf::Font m_font;
     sf::Text m_uiText;
 
-    //宣告順序很重要：Texture 必須在 Sprite 之前
     sf::Texture m_videoTexture;
     sf::Sprite m_videoSprite;
 
@@ -75,7 +75,18 @@ private:
     void handleShopClick(sf::Vector2f mousePos);
     void handleMapClick(sf::Vector2f mousePos);
 
-    // 加入這些函式宣告
     void checkGamblerEvent();
     void triggerGamblerTransformation();
+
+    struct FloatingText {
+        sf::Text text;
+        float lifeTime;
+        sf::Vector2f velocity;
+
+        FloatingText(const sf::Font& font)
+            : text(font), lifeTime(1.0f), velocity({ 0.f, -50.f }) {
+        }
+    };
+    std::vector<FloatingText> m_floatingTexts;
+
 };

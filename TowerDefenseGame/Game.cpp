@@ -77,7 +77,7 @@ void Game::initTestPath() {
     m_testPath.push_back({ 1280.f, 200.f });
 }
 
-// [修正] 實作檢查事件
+// 實作檢查事件
 void Game::checkGamblerEvent() {
     if (m_playerStats.gold >= 100000 && !m_playerStats.hasTriggeredGamblerEvent) {
         m_gameState = GameState::GamblerEventPrompt;
@@ -85,7 +85,7 @@ void Game::checkGamblerEvent() {
     }
 }
 
-// [修正] 實作變身邏輯
+// 實作變身邏輯
 void Game::triggerGamblerTransformation() {
     m_playerStats.gold = 0;
 
@@ -245,7 +245,12 @@ void Game::handleMapClick(sf::Vector2f mousePos) {
             }
 
             if (newTower) {
+                newTower->setTextCallback([this](std::string text, sf::Vector2f pos, sf::Color color) {
+                    this->spawnFloatingText(text, pos, color);
+                    });
+
                 m_towers.push_back(std::move(newTower));
+
                 m_playerStats.inventory[type]--;
                 if (m_upgradePanel) m_upgradePanel->setSelectedTower(nullptr);
                 if (m_playerStats.inventory[type] <= 0) m_selectedTower = std::nullopt;
@@ -329,6 +334,20 @@ void Game::update(sf::Time dt) {
     std::erase_if(m_projectiles, [](const auto& proj) { return !proj->isActive(); });
     std::erase_if(m_towers, [](const auto& tower) { return !tower->isActive(); });
 
+    // 更新漂浮文字
+    for (auto it = m_floatingTexts.begin(); it != m_floatingTexts.end(); ) {
+        it->lifeTime -= dt.asSeconds();
+        it->text.move(it->velocity * dt.asSeconds());
+
+        // 淡出效果
+        sf::Color c = it->text.getFillColor();
+        c.a = static_cast<std::uint8_t>(255 * std::max(0.f, it->lifeTime));
+        it->text.setFillColor(c);
+
+        if (it->lifeTime <= 0.f) it = m_floatingTexts.erase(it);
+        else ++it;
+    }
+
     updateUI();
 }
 
@@ -346,6 +365,8 @@ void Game::updateUI() {
 
 void Game::render() {
     m_window.clear(sf::Color::Black);
+
+    for (const auto& ft : m_floatingTexts) m_window.draw(ft.text);
 
     if (m_gameState == GameState::GamblerVideoPlaying) {
         m_window.draw(m_videoSprite);
@@ -387,4 +408,21 @@ void Game::run() {
         update(dt);
         render();
     }
+}
+
+void Game::spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size) {
+    FloatingText ft(m_font);
+    
+    ft.text.setString(str);
+    ft.text.setCharacterSize(size);
+    ft.text.setFillColor(color);
+    ft.text.setOutlineColor(sf::Color::Black);
+    ft.text.setOutlineThickness(1.5f);
+
+    sf::FloatRect bounds = ft.text.getLocalBounds();
+    ft.text.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
+    ft.text.setPosition(pos);
+
+    // 加入容器
+    m_floatingTexts.push_back(std::move(ft));
 }

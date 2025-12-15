@@ -7,7 +7,7 @@
 Tower::Tower(sf::Vector2f pos,
     const std::vector<std::shared_ptr<Enemy>>& enemies,
     std::vector<std::unique_ptr<Projectile>>& projectiles,
-    const PlayerStats& stats)
+    PlayerStats& stats)
     : m_enemies(enemies),
     m_projectiles(projectiles),
     m_stats(stats)

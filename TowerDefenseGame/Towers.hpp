@@ -12,7 +12,7 @@
 class BasicTower : public Tower {
 public:
     BasicTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
-        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         m_type = TowerType::Basic;
@@ -67,7 +67,7 @@ protected:
 class LaserTower : public Tower {
 public:
     LaserTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
-        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         m_type = TowerType::Laser;
@@ -148,7 +148,7 @@ protected:
 class SniperTower : public Tower {
 public:
     SniperTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
-        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         m_type = TowerType::Sniper;
@@ -192,7 +192,7 @@ protected:
 class SlowTower : public Tower {
 public:
     SlowTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
-        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         m_type = TowerType::Slow;
@@ -236,7 +236,7 @@ protected:
 class TeleportTower : public Tower {
 public:
     TeleportTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
-        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         m_type = TowerType::Teleport;
@@ -265,7 +265,7 @@ protected:
 class SelfDestructTower : public Tower {
 public:
     SelfDestructTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
-        std::vector<std::unique_ptr<Projectile>>& p, const PlayerStats& s)
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         m_type = TowerType::SelfDestruct;
@@ -348,7 +348,7 @@ protected:
 class GamblerTower : public Tower {
 public:
     GamblerTower(sf::Vector2f pos, const std::vector<std::shared_ptr<Enemy>>& e,
-        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s) // 注意: 這裡要傳 PlayerStats& 而非 const，因為要加錢
+        std::vector<std::unique_ptr<Projectile>>& p, PlayerStats& s)
         : Tower(pos, e, p, s)
     {
         m_type = TowerType::Gambler;
@@ -390,57 +390,43 @@ public:
     void performAction() override {
         auto target = findTarget(m_range);
         if (target) {
-            // [新增] 每次攻擊獲得 5 金幣 (addGold 內已包含 WealthDiamond 判斷)
-            // 這裡需要 const_cast 或是把 m_stats 改為 non-const reference
-            // 為了方便，我們在 Game.cpp 傳遞時已經將 PlayerStats 改為 reference
-            // 但 Tower 基礎類別存的是 const PlayerStats&，這裡我們偷用 const_cast
-            const_cast<PlayerStats&>(m_stats).addGold(5);
 
-            // TODO: 在這裡彈出 "+$5" 或 "+$10" 的漂浮文字
-            // 由於 Tower 類別無法直接存取 Game 的 UI 層，這裡暫時省略，
-            // 實務上可以傳入一個 callback function 來生成文字。
+            m_stats.addGold(5);
+            if (m_onTextRequest) {
+                m_onTextRequest("+$5", getPosition() + sf::Vector2f(0, -30), sf::Color::Yellow);
+            }
 
             // 骰機率
             int r = Utils::m_rand(); // 0-99
 
             int finalDmg = getDamage();
-            bool isInstantKill = false;
-            bool isDouble = false;
-            bool isZero = false;
-
             if (r < 5) {
                 // 5% 秒殺
-                isInstantKill = true;
+                finalDmg = 999999;
+                if (m_onTextRequest) {
+                    m_onTextRequest("JACKPOT!", target->getPosition(), sf::Color::Red);
+                }
             }
             else if (r < 25) {
-                // 20% 雙倍 (5~24)
+                // 20% 雙倍
                 finalDmg *= 2;
-                isDouble = true;
+                if (m_onTextRequest) {
+                    m_onTextRequest("DOUBLE!", target->getPosition(), sf::Color(255, 140, 0)); // 深橘色
+                }
             }
             else if (r < 50) {
-                // 25% 變為 0 (25~49)
+                // 25% 失敗 (0傷)
                 finalDmg = 0;
-                isZero = true;
+                if (m_onTextRequest) {
+                    m_onTextRequest("MISS...", target->getPosition(), sf::Color(150, 150, 150)); // 灰色
+                }
             }
-            // 剩下 50% 正常傷害
 
-            // 發射子彈，但這邊直接結算傷害會比較容易做特效
-            // 或者我們可以修改 Projectile 讓它攜帶特殊 flag
-            // 這裡簡單起見，我們直接對目標造成傷害 (類似 Laser) 
-            // 但為了要有彈道，我們還是生成 Projectile，但要在 Projectile 增加屬性
-
-            // 這裡我們用一個變通方法：生成 Projectile，把計算好的 damage 傳進去
-            // 若是秒殺，傳一個巨大的數字
-
-            if (isInstantKill) finalDmg = 999999;
-
-            // 寶石效果依然有效
             bool isFire = m_stats.isAccessoryActive(AccessoryType::FireGem) && (Utils::m_rand() < 50);
             bool isIce = m_stats.isAccessoryActive(AccessoryType::IceGem) && (Utils::m_rand() < 20);
             bool isExplosive = m_stats.isAccessoryActive(AccessoryType::ExplosiveGem) && (Utils::m_rand() < 20);
 
-            // 為了視覺效果，如果秒殺或雙倍，我們可以傳入特殊的 Projectile 顏色
-            // 這裡先用標準生成
+            
             m_projectiles.push_back(std::make_unique<Projectile>(
                 getPosition(), target, m_enemies, finalDmg, isFire, isIce, isExplosive
             ));
