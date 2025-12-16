@@ -19,6 +19,8 @@
 
 //加入 Gambler 相關狀態
 enum class GameState {
+    MainMenu,
+    Rules,
     Shop,
     WaveRunning,
     GameOver,
@@ -92,4 +94,65 @@ private:
     };
     std::vector<FloatingText> m_floatingTexts;
 
+    //我把這個全部丟在這邊應該不會被打吧
+    struct MenuButton {
+        sf::RectangleShape shape;
+        sf::Text text;
+
+        MenuButton(const sf::Font& font) : text(font) {}
+
+        void init(const std::string& str, sf::Vector2f pos, sf::Vector2f size) {
+            shape.setSize(size);
+            shape.setOrigin(size / 2.f);
+            shape.setPosition(pos);
+            shape.setFillColor(sf::Color(50, 50, 50));
+            shape.setOutlineColor(sf::Color::White);
+            shape.setOutlineThickness(2.f);
+
+
+            text.setString(sf::String::fromUtf8(str.begin(), str.end()));
+            text.setCharacterSize(24);
+            text.setFillColor(sf::Color::White);
+
+            sf::FloatRect bounds = text.getLocalBounds();
+            text.setOrigin({ bounds.size.x / 2.f + bounds.position.x, bounds.size.y / 2.f + bounds.position.y });
+            text.setPosition(pos);
+        }
+
+        // 更新互動 (滑鼠懸停放大)
+        void update(sf::Vector2f mousePos) {
+            if (shape.getGlobalBounds().contains(mousePos)) {
+                shape.setScale({ 1.1f, 1.1f });
+                text.setScale({ 1.1f, 1.1f });
+                shape.setOutlineColor(sf::Color::Yellow);
+                text.setFillColor(sf::Color::Yellow);
+            }
+            else {
+                shape.setScale({ 1.0f, 1.0f });
+                text.setScale({ 1.0f, 1.0f });
+                shape.setOutlineColor(sf::Color::White);
+                text.setFillColor(sf::Color::White);
+            }
+        }
+
+        void draw(sf::RenderWindow& window) {
+            window.draw(shape);
+            window.draw(text);
+        }
+
+        bool isClicked(sf::Vector2f mousePos) const {
+            return shape.getGlobalBounds().contains(mousePos);
+        }
+    };
+
+    sf::Text m_titleText;
+    sf::Text m_rulesContent;
+
+    MenuButton m_btnStart;
+    MenuButton m_btnRules;
+    MenuButton m_btnRuleStart;
+
+    // 選單函式
+    void initMenu();
+    void updateMenu();
 };

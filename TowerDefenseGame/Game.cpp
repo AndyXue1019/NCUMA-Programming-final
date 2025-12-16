@@ -16,14 +16,21 @@ Game::Game()
         static_cast<float>(Config::GRID_SIZE)),
     m_uiText(m_font),
     m_videoSprite(m_videoTexture), 
-	m_finishSprite(m_finishTexture)
+	m_finishSprite(m_finishTexture),
+    m_titleText(m_font),
+    m_rulesContent(m_font),
+    m_btnStart(m_font),
+    m_btnRules(m_font),
+    m_btnRuleStart(m_font)
 {
     m_window.setFramerateLimit(Config::FRAME_RATE_LIMIT);
 
     loadResources();
+    initMenu();
     initTestPath();
     m_map.addPath(m_testPath);
 
+    m_gameState = GameState::MainMenu;
     m_gameUI = std::make_unique<GameUI>(m_font, m_playerStats);
     m_upgradePanel = std::make_unique<UpgradePanel>(m_font);
     m_inventoryPanel = std::make_unique<InventoryPanel>(m_font, m_playerStats);
@@ -44,7 +51,6 @@ Game::Game()
 
     m_videoSprite.setTexture(m_videoTexture);
 
-    // SFML 3.0 setScale 需要 Vector2f
     sf::Vector2u size = m_videoTexture.getSize();
     if (size.x > 0 && size.y > 0) {
         m_videoSprite.setScale({
@@ -61,21 +67,20 @@ Game::Game()
         m_finishTexture.loadFromImage(img);
     }
 
-    // 2. 取得這張圖片專屬的大小 (不要用上面的 size，要用 finishSize)
+    // 2. 取得這張圖片專屬的大小
     sf::Vector2u finishSize = m_finishTexture.getSize();
 
     // 3. 設定紋理
     m_finishSprite.setTexture(m_finishTexture);
 
     // 4. 設定裁切區域
-    // 必須使用 finishSize (這張圖的尺寸)，絕對不能用 size (那是影片的尺寸)
     if (finishSize.x > 0 && finishSize.y > 0) {
         m_finishSprite.setTextureRect(sf::IntRect(
             { 0, 0 },
             { static_cast<int>(finishSize.x), static_cast<int>(finishSize.y) }
         ));
 
-        // 5. 設定縮放比例 (讓圖片填滿視窗)
+        // 5. 設定縮放比例
         float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / static_cast<float>(finishSize.x);
         float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / static_cast<float>(finishSize.y);
         m_finishSprite.setScale({ scaleX, scaleY });
@@ -137,6 +142,35 @@ void Game::processEvents() {
         if (event->is<sf::Event::Closed>()) {
             m_window.close();
             m_isRunning = false;
+        }
+
+        if (m_gameState == GameState::MainMenu) {
+            if (const auto* mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (mouseButton->button == sf::Mouse::Button::Left) {
+                    sf::Vector2f mousePos(static_cast<float>(mouseButton->position.x), static_cast<float>(mouseButton->position.y));
+
+                    if (m_btnStart.isClicked(mousePos)) {
+                        m_gameState = GameState::Shop; // 開始遊戲 (進入商店階段)
+                    }
+                    else if (m_btnRules.isClicked(mousePos)) {
+                        m_gameState = GameState::Rules; // 進入規則頁面
+                    }
+                }
+            }
+            continue; // 如果是選單事件，處理完就換下一個 event，不跑下面的邏輯
+        }
+
+        if (m_gameState == GameState::Rules) {
+            if (const auto* mouseButton = event->getIf<sf::Event::MouseButtonPressed>()) {
+                if (mouseButton->button == sf::Mouse::Button::Left) {
+                    sf::Vector2f mousePos(static_cast<float>(mouseButton->position.x), static_cast<float>(mouseButton->position.y));
+
+                    if (m_btnRuleStart.isClicked(mousePos)) {
+                        m_gameState = GameState::Shop; // 從規則頁面直接開始
+                    }
+                }
+            }
+            continue;
         }
 
         // 詢問視窗的點擊
@@ -304,6 +338,11 @@ void Game::update(sf::Time dt) {
         return;
     }
 
+    if (m_gameState == GameState::MainMenu || m_gameState == GameState::Rules) {
+        updateMenu();
+        return; // 選單狀態下不更新遊戲邏輯
+    }
+
     //  檢查玩家血量是否歸零
     if (m_playerStats.lives <= 0) {
         m_gameState = GameState::GameOver;
@@ -405,7 +444,18 @@ void Game::render() {
 
     for (const auto& ft : m_floatingTexts) m_window.draw(ft.text);
 
-    if (m_gameState == GameState::GamblerVideoPlaying) {
+    // 繪製選單
+    if (m_gameState == GameState::MainMenu) {
+        m_window.draw(m_titleText);
+        m_btnStart.draw(m_window);
+        m_btnRules.draw(m_window);
+    }
+    // 繪製規則頁面
+    else if (m_gameState == GameState::Rules) {
+        m_window.draw(m_rulesContent);
+        m_btnRuleStart.draw(m_window);
+    }
+    else if (m_gameState == GameState::GamblerVideoPlaying) {
         m_window.draw(m_videoSprite);
     }
     else if (m_gameState == GameState::GameOver) {
@@ -465,4 +515,51 @@ void Game::spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color
 
     // 加入容器
     m_floatingTexts.push_back(std::move(ft));
+}
+
+void Game::initMenu() {
+    // 1. 設定主標題
+    std::string titleStr = "Normal Tower Defence Game";
+    m_titleText.setString(sf::String::fromUtf8(titleStr.begin(), titleStr.end()));
+    m_titleText.setCharacterSize(60);
+    m_titleText.setFillColor(sf::Color::White);
+    m_titleText.setStyle(sf::Text::Bold);
+
+    sf::FloatRect bounds = m_titleText.getLocalBounds();
+    m_titleText.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
+    m_titleText.setPosition({ static_cast<float>(Config::WINDOW_WIDTH) / 2.f, 150.f });
+
+    // 2. 設定按鈕
+    float centerX = static_cast<float>(Config::WINDOW_WIDTH) / 2.f;
+    float startY = 350.f;
+    float gap = 100.f;
+
+    // 這裡 init 不再需要傳 m_font
+    m_btnStart.init("Start", { centerX, startY }, { 200.f, 60.f });
+    m_btnRules.init("Rules", { centerX, startY + gap }, { 200.f, 60.f });
+
+    // 3. 設定規則頁面內容
+    m_rulesContent.setString("Game Rules:\n\n1. Build towers to stop enemies.\n2. Collect gold to buy the 'God of Gamblers'.\n3. Survive 20 waves.");
+    m_rulesContent.setCharacterSize(24);
+    m_rulesContent.setFillColor(sf::Color(200, 200, 200));
+    m_rulesContent.setPosition({ 100.f, 100.f });
+
+    // 4. 設定規則頁面按鈕
+    m_btnRuleStart.init("Start",
+        { static_cast<float>(Config::WINDOW_WIDTH) - 150.f, static_cast<float>(Config::WINDOW_HEIGHT) - 100.f },
+        { 150.f, 50.f });
+}
+
+void Game::updateMenu() {
+    // 取得滑鼠座標
+    sf::Vector2i pixelPos = sf::Mouse::getPosition(m_window);
+    sf::Vector2f mousePos = m_window.mapPixelToCoords(pixelPos);
+
+    if (m_gameState == GameState::MainMenu) {
+        m_btnStart.update(mousePos);
+        m_btnRules.update(mousePos);
+    }
+    else if (m_gameState == GameState::Rules) {
+        m_btnRuleStart.update(mousePos);
+    }
 }
