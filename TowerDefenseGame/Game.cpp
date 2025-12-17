@@ -17,6 +17,7 @@ Game::Game()
     m_uiText(m_font),
     m_videoSprite(m_videoTexture), 
 	m_finishSprite(m_finishTexture),
+	m_winSprite(m_winTexture),
     m_titleText(m_font),
     m_rulesContent(m_font),
     m_btnStart(m_font),
@@ -76,20 +77,38 @@ Game::Game()
     // 2. 取得這張圖片專屬的大小
     sf::Vector2u finishSize = m_finishTexture.getSize();
 
-    // 3. 設定紋理
     m_finishSprite.setTexture(m_finishTexture);
-
-    // 4. 設定裁切區域
     if (finishSize.x > 0 && finishSize.y > 0) {
         m_finishSprite.setTextureRect(sf::IntRect(
             { 0, 0 },
             { static_cast<int>(finishSize.x), static_cast<int>(finishSize.y) }
         ));
 
-        // 5. 設定縮放比例
         float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / static_cast<float>(finishSize.x);
         float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / static_cast<float>(finishSize.y);
         m_finishSprite.setScale({ scaleX, scaleY });
+    }
+
+    if (!m_winTexture.loadFromFile("win.png")) {
+        std::cout << "Failed to load win.png! Creating fallback." << std::endl;
+        sf::Image img;
+        img.resize({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }, sf::Color::Green);
+        if (!m_winTexture.loadFromImage(img)) {
+            std::cerr << "Fallback image creation failed!" << std::endl;
+        }
+    }
+
+    m_winSprite.setTexture(m_winTexture);
+    sf::Vector2u winSize = m_winTexture.getSize();
+    if (winSize.x > 0 && winSize.y > 0) {
+        m_winSprite.setTextureRect(sf::IntRect(
+            { 0, 0 },
+            { static_cast<int>(winSize.x), static_cast<int>(winSize.y) }
+        ));
+
+        float scaleX = static_cast<float>(Config::WINDOW_WIDTH) / static_cast<float>(winSize.x);
+        float scaleY = static_cast<float>(Config::WINDOW_HEIGHT) / static_cast<float>(winSize.y);
+        m_winSprite.setScale({ scaleX, scaleY });
     }
 }
 
@@ -373,7 +392,14 @@ void Game::update(sf::Time dt) {
     if (m_gameState == GameState::WaveRunning) {
         m_waveManager->update(dt);
         if (!m_waveManager->isWaveInProgress()) {
+            if(m_playerStats.currentWave >= 20) {
+                m_gameState = GameState::GameOver; // 遊戲結束
+                std::cout << "Victory! Reached wave 20." << std::endl;
+            }
+        else {
+            // 還沒到 20 波，進入商店階段
             m_gameState = GameState::Shop;
+        }
         }
     }
     m_upgradePanel->update(dt);
@@ -465,7 +491,12 @@ void Game::render() {
         m_window.draw(m_videoSprite);
     }
     else if (m_gameState == GameState::GameOver) {
-        m_window.draw(m_finishSprite);
+        if (m_playerStats.lives > 0) {
+            m_window.draw(m_winSprite);
+        }
+        else {
+            m_window.draw(m_finishSprite);
+        }
     }
     else {
         m_map.draw(m_window, sf::RenderStates::Default);

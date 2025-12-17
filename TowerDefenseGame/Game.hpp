@@ -17,7 +17,6 @@
 #include "UpgradePanel.hpp"
 #include "WaveManager.hpp"
 
-//加入 Gambler 相關狀態
 enum class GameState {
     MainMenu,
     Rules,
@@ -70,6 +69,9 @@ private:
 
     sf::Texture m_finishTexture;
     sf::Sprite m_finishSprite;
+
+    sf::Texture m_winTexture;
+    sf::Sprite m_winSprite;
 
     float m_videoTimer = 0.f;
     float m_videoDuration = 5.0f; // 影片長度
