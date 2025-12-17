@@ -1,5 +1,8 @@
 #include "GameUI.hpp"
+
 #include <format>
+#include <iostream>
+
 #include "Config.hpp"
 #include "TowerData.hpp"
 
@@ -176,8 +179,11 @@ void GameUI::updateButtons(bool isShopPhase) {
                 btn.subLabel.setFillColor(sf::Color::Green);
             }
             else {
-                btn.subLabel.setString(std::format("x{}", count));
-                btn.subLabel.setFillColor(sf::Color::White);
+                btn.locked = true;
+                btn.shape.setFillColor(sf::Color::Black);
+                btn.subLabel.setString("LOCKED");
+                btn.subLabel.setFillColor(sf::Color(100, 100, 100));
+                btn.subLabel.setCharacterSize(14);
             }
             continue;
         }
@@ -228,7 +234,10 @@ void GameUI::createHeartTexture() {
             }
         }
     }
-    m_heartTexture.loadFromImage(img);
+    bool loaded = m_heartTexture.loadFromImage(img);
+    if (!loaded) {
+        std::cerr << "Failed to create heart texture!" << std::endl;
+    }
     m_heartTexture.setSmooth(true);
 }
 
@@ -298,4 +307,46 @@ std::optional<TowerType> GameUI::handleClick(sf::Vector2f mousePos) {
         }
     }
     return std::nullopt;
+}
+
+MenuButton::MenuButton(const sf::Font& font) : text(font) {}
+
+void MenuButton::init(const std::string& str, sf::Vector2f pos, sf::Vector2f size) {
+    shape.setSize(size);
+    shape.setOrigin(size / 2.f);
+    shape.setPosition(pos);
+    shape.setFillColor(sf::Color(50, 50, 50));
+    shape.setOutlineColor(sf::Color::White);
+    shape.setOutlineThickness(2.f);
+
+    text.setString(sf::String::fromUtf8(str.begin(), str.end()));
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::White);
+
+    sf::FloatRect bounds = text.getLocalBounds();
+    text.setOrigin({bounds.size.x / 2.f + bounds.position.x, bounds.size.y / 2.f + bounds.position.y});
+    text.setPosition(pos);
+}
+
+void MenuButton::update(sf::Vector2f mousePos) {
+    if (shape.getGlobalBounds().contains(mousePos)) {
+        shape.setScale({1.1f, 1.1f});
+        text.setScale({1.1f, 1.1f});
+        shape.setOutlineColor(sf::Color::Yellow);
+        text.setFillColor(sf::Color::Yellow);
+    } else {
+        shape.setScale({1.0f, 1.0f});
+        text.setScale({1.0f, 1.0f});
+        shape.setOutlineColor(sf::Color::White);
+        text.setFillColor(sf::Color::White);
+    }
+}
+
+void MenuButton::draw(sf::RenderWindow& window) {
+    window.draw(shape);
+    window.draw(text);
+}
+
+bool MenuButton::isClicked(sf::Vector2f mousePos) const {
+    return shape.getGlobalBounds().contains(mousePos);
 }

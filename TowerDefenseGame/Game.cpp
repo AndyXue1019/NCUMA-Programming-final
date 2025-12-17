@@ -43,7 +43,10 @@ Game::Game()
         std::cout << "Image NOT found! Creating RED fallback." << std::endl;
         sf::Image img;
         img.resize({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }, sf::Color::Red);
-        m_videoTexture.loadFromImage(img);
+        bool loaded = m_videoTexture.loadFromImage(img);
+        if (!loaded) {
+            std::cerr << "Fallback image creation failed!" << std::endl;
+        }
     }
     else {
         std::cout << "Image loaded successfully!" << std::endl;
@@ -64,7 +67,10 @@ Game::Game()
         std::cout << "Failed to load finish.png! Creating fallback." << std::endl;
         sf::Image img;
         img.resize({ Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT }, sf::Color::Red);
-        m_finishTexture.loadFromImage(img);
+        bool loaded = m_finishTexture.loadFromImage(img);
+        if (!loaded) {
+            std::cerr << "Fallback image creation failed!" << std::endl;
+        }
     }
 
     // 2. 取得這張圖片專屬的大小
@@ -259,7 +265,7 @@ void Game::handleShopClick(sf::Vector2f mousePos) {
     if (m_gameState == GameState::Shop) {
 
         // 特例：如果是賭神塔，且我們已經擁有它 -> 視為「選取」而不是購買
-        if (type == TowerType::Gambler && currentStock > 0) {
+        if (type == TowerType::Gambler && m_playerStats.hasGambler) {
             m_selectedTower = type;
             std::cout << "Selected God Tower for placement." << std::endl;
             return;

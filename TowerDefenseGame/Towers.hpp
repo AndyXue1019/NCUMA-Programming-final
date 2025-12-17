@@ -354,7 +354,7 @@ public:
         m_type = TowerType::Gambler;
         const auto& info = TowerData::INFO.at(m_type);
         m_name = info.name;
-        m_price = 0;
+        m_price = INT_MAX;
         m_shape.setFillColor(info.color);
         m_shape.setOutlineColor(sf::Color::White);
         m_shape.setOutlineThickness(3.f);
@@ -420,7 +420,7 @@ public:
                 if (m_onTextRequest) {
                     m_onTextRequest("MISS...", target->getPosition(), sf::Color(150, 150, 150)); // ¦Ç¦â
                 }
-            }
+            } 
 
             bool isFire = m_stats.isAccessoryActive(AccessoryType::FireGem) && (Utils::m_rand() < 50);
             bool isIce = m_stats.isAccessoryActive(AccessoryType::IceGem) && (Utils::m_rand() < 20);

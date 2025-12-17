@@ -54,3 +54,19 @@ private:
     // 生成愛心圖片的函式
     void createHeartTexture();
 };
+
+struct MenuButton {
+    sf::RectangleShape shape;
+    sf::Text text;
+
+    MenuButton(const sf::Font& font);
+
+    void init(const std::string& str, sf::Vector2f pos, sf::Vector2f size);
+
+    // 更新互動 (滑鼠懸停放大)
+    void update(sf::Vector2f mousePos);
+
+    void draw(sf::RenderWindow& window);
+
+    bool isClicked(sf::Vector2f mousePos) const;
+};
