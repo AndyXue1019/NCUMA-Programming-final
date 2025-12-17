@@ -160,6 +160,11 @@
     <ClInclude Include="Utils.hpp" />
     <ClInclude Include="WaveManager.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="finish.png" />
+    <Image Include="GodOfGamblers.jpg" />
+    <Image Include="win.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
