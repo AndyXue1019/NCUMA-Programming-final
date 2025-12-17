@@ -231,6 +231,17 @@ void Game::processEvents() {
                     m_gameState = GameState::WaveRunning;
                     m_waveManager->startNextWave();
                     m_selectedTower = std::nullopt;
+
+                    std::string title = "WAVE " + std::to_string(m_playerStats.currentWave);
+
+                    spawnFloatingText(
+                        title,
+                        { Config::WINDOW_WIDTH / 2.f - 50.0f, Config::WINDOW_HEIGHT / 2.f - 50.0f},
+                        sf::Color::Red,   // 顏色
+                        80,                 // 大小：80 (很大)
+                        2.5f,               // 時間：2.5 秒 (淡出較慢)
+                        { 0.f, 0.f }        // 速度：{0,0} (靜止不動)
+                    );
                 }
             }
         }
@@ -537,20 +548,20 @@ void Game::run() {
     }
 }
 
-void Game::spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size) {
-    FloatingText ft(m_font);
-    
+void Game::spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size, float lifeTime, sf::Vector2f velocity) {
+
+    FloatingText ft(m_font, lifeTime, velocity);
+
     ft.text.setString(str);
     ft.text.setCharacterSize(size);
     ft.text.setFillColor(color);
     ft.text.setOutlineColor(sf::Color::Black);
-    ft.text.setOutlineThickness(1.5f);
+    ft.text.setOutlineThickness(2.f);
 
     sf::FloatRect bounds = ft.text.getLocalBounds();
-    ft.text.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
+    ft.text.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f }); // 確保置中
     ft.text.setPosition(pos);
 
-    // 加入容器
     m_floatingTexts.push_back(std::move(ft));
 }
 

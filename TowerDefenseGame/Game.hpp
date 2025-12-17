@@ -32,7 +32,7 @@ public:
     Game();
     void run();
 
-    void spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size = 20);
+    void spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size = 20, float lifeTime = 1.0f, sf::Vector2f velocity = { 0.f, -50.f });
 private:
     void processEvents();
     void update(sf::Time dt);
@@ -90,8 +90,8 @@ private:
         float lifeTime;
         sf::Vector2f velocity;
 
-        FloatingText(const sf::Font& font)
-            : text(font), lifeTime(1.0f), velocity({ 0.f, -50.f }) {
+        FloatingText(const sf::Font& font, float life, sf::Vector2f vel)
+            : text(font), lifeTime(life), velocity(vel) {
         }
     };
     std::vector<FloatingText> m_floatingTexts;
