@@ -231,8 +231,7 @@ void GameUI::createHeartTexture() {
             }
         }
     }
-    bool loaded = m_heartTexture.loadFromImage(img);
-    if (!loaded) {
+    if (!m_heartTexture.loadFromImage(img)) {
         std::cerr << "Failed to create heart texture!" << std::endl;
     }
     m_heartTexture.setSmooth(true);

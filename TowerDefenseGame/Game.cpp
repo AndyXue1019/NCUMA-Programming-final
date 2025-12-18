@@ -43,8 +43,7 @@ Game::Game()
         std::cout << "Image NOT found! Creating RED fallback." << std::endl;
         sf::Image img;
         img.resize({Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT}, sf::Color::Red);
-        bool loaded = m_videoTexture.loadFromImage(img);
-        if (!loaded) {
+        if (!m_videoTexture.loadFromImage(img)) {
             std::cerr << "Fallback image creation failed!" << std::endl;
         }
     } else {
@@ -64,8 +63,7 @@ Game::Game()
         std::cout << "Failed to load finish.png! Creating fallback." << std::endl;
         sf::Image img;
         img.resize({Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT}, sf::Color::Red);
-        bool loaded = m_finishTexture.loadFromImage(img);
-        if (!loaded) {
+        if (!m_finishTexture.loadFromImage(img)) {
             std::cerr << "Fallback image creation failed!" << std::endl;
         }
     }

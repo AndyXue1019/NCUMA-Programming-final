@@ -53,11 +53,39 @@ int Tower::getNextLevelDamage() const {
 }
 
 std::shared_ptr<Enemy> Tower::findTarget(float range) {
+    std::shared_ptr<Enemy> bestCandidate = nullptr;
+
     for (const auto& enemy : m_enemies) {
         if (!enemy->isActive()) continue;
-        if (Utils::distance(getPosition(), enemy->getPosition()) <= range) {
-            return enemy;
+
+        // 檢查是否在攻擊範圍內
+        float distToTower = Utils::distance(getPosition(), enemy->getPosition());
+        if (distToTower > range) continue;
+
+        if (bestCandidate == nullptr) {
+            bestCandidate = enemy;
+            continue;
+        }
+
+        // 比較 enemy 與 bestCandidate 誰離終點比較近
+        // 判斷 A: 誰的 waypoint index 比較大 (代表走過的路段較多)
+        std::size_t enemyIdx = enemy->getWaypointIndex();
+        std::size_t bestIdx = bestCandidate->getWaypointIndex();
+
+        if (enemyIdx > bestIdx) {
+            bestCandidate = enemy;
+        } else if (enemyIdx == bestIdx) {
+            // 判斷 B: 如果 index 一樣 (在同一路段)，比較誰離下一個目標點更近
+            // (離目標點越近 = 離終點越近)
+            sf::Vector2f nextNode = enemy->getNextWaypointPos();  // 兩者目標點相同
+
+            float distEnemy = Utils::distance(enemy->getPosition(), nextNode);
+            float distBest = Utils::distance(bestCandidate->getPosition(), nextNode);
+
+            if (distEnemy < distBest) {
+                bestCandidate = enemy;
+            }
         }
     }
-    return nullptr;
+    return bestCandidate;
 }
