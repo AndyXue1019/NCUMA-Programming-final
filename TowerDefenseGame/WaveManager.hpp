@@ -38,7 +38,7 @@ class WaveManager {
         EnemyType type;
     };
 
-    int m_currentWaveIndex = 18;  //[0 ~ 19]
+    int m_currentWaveIndex = 0;  //[0 ~ 19]
     bool m_spawning = false;
     float m_spawnTimer = 0.f;
     float m_spawnInterval = 1.0f;

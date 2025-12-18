@@ -22,9 +22,20 @@ Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target,
         m_shape.setFillColor(sf::Color(255, 69, 0));  // 橘紅
     else
         m_shape.setFillColor(sf::Color::Yellow);
+
+    m_shockwave.setRadius(10.f);
+    m_shockwave.setOrigin({10.f, 10.f});
+    m_shockwave.setFillColor(sf::Color::Transparent);     // 內部透明
+    m_shockwave.setOutlineColor(sf::Color(255, 100, 0));  // 橘紅色邊框
+    m_shockwave.setOutlineThickness(3.f);
 }
 
 void Projectile::update(sf::Time dt) {
+    if (m_isExploding) {
+        updateExplosion(dt);
+        return;
+    }
+
     auto targetSp = m_target.lock();
     if (!targetSp || !targetSp->isActive()) {
         destroy();
@@ -48,18 +59,20 @@ void Projectile::update(sf::Time dt) {
 
         // 4. 爆裂效果 (小範圍 AOE)
         if (m_isExplosive) {
-            float range = 100.f;              // 爆炸半徑
-            int explosionDmg = m_damage * 2;  // 200% 傷害
+            float range = 100.f;                // 爆炸半徑
+            int explosionDmg = m_damage * 1.5;  // 150% 傷害
 
             for (const auto& enemy : m_enemies) {
                 if (enemy->isActive() && Utils::distance(m_shape.getPosition(), enemy->getPosition()) <= range) {
-                    // 對範圍內敵人造成傷害 (包含目標自己，可能會受到兩次傷害，視設計而定)
-                    // 這裡簡單做：對範圍內「所有」敵人造成爆炸傷
-                    // 如果不想讓主目標受兩次傷，可以判斷 if (enemy != targetSp)
+                    if (enemy == targetSp) continue;  // 避免對主目標造成兩次傷害
                     enemy->takeDamage(explosionDmg);
                 }
             }
-            // 可以加個特效 (這裡略)
+
+            m_isExploding = true;
+            m_shockwave.setPosition(m_shape.getPosition());
+
+            return;  // 等待下一次 update 處理爆炸動畫
         }
 
         destroy();
@@ -71,5 +84,31 @@ void Projectile::update(sf::Time dt) {
 }
 
 void Projectile::draw(sf::RenderWindow& window) {
-    window.draw(m_shape);
+    if (m_isExploding) {
+        window.draw(m_shockwave);
+    } else {
+        window.draw(m_shape);
+    }
+}
+
+void Projectile::updateExplosion(sf::Time dt) {
+    float currentRadius = m_shockwave.getRadius();
+    float expansionSpeed = 300.f;  // 擴散速度
+    float newRadius = currentRadius + expansionSpeed * dt.asSeconds();
+
+    m_shockwave.setRadius(newRadius);
+    m_shockwave.setOrigin({newRadius, newRadius});  // 保持中心對齊
+
+    float fadeSpeed = 500.f;  // 淡出速度 (比自爆塔快一點)
+    m_explosionAlpha -= fadeSpeed * dt.asSeconds();
+
+    // 當完全透明時，才真正銷毀物件
+    if (m_explosionAlpha <= 0.f) {
+        m_explosionAlpha = 0.f;
+        this->destroy();
+    }
+
+    sf::Color c = m_shockwave.getOutlineColor();
+    c.a = static_cast<std::uint8_t>(m_explosionAlpha);
+    m_shockwave.setOutlineColor(c);
 }

@@ -31,4 +31,10 @@ class Projectile : public Entity {
     bool m_isFire = false;
     bool m_isIce = false;
     bool m_isExplosive = false;
+
+    // for explosion effect
+    bool m_isExploding = false;
+    sf::CircleShape m_shockwave;
+    float m_explosionAlpha = 255.f;
+    void updateExplosion(sf::Time dt);
 };

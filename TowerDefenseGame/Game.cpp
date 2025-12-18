@@ -217,7 +217,8 @@ void Game::processEvents() {
                 m_inventoryPanel->handleMouseMove(mousePos);
             }
         } else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
-            if (keyPressed->code == sf::Keyboard::Key::Enter) {
+            using Key = sf::Keyboard::Key;
+            if (keyPressed->code == Key::Enter or keyPressed->code == Key::Space) {
                 if (m_gameState == GameState::Shop && m_playerStats.currentWave < 20) {
                     m_gameState = GameState::WaveRunning;
                     m_waveManager->startNextWave();
