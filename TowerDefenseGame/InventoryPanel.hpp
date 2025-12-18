@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <cstdint> // for std::uint8_t
+#include <cstdint>  // for std::uint8_t
 #include <format>
 #include <string>
 #include <vector>
@@ -10,20 +10,19 @@
 #include "PlayerStats.hpp"
 
 class InventoryPanel {
-public:
+   public:
     InventoryPanel(const sf::Font& font, PlayerStats& stats)
         : m_font(font), m_stats(stats), m_tooltipText(font), m_trashText(font) {
-
         // 背包按鈕
-        m_toggleBtn.setSize({ 50.f, 50.f });
-        m_toggleBtn.setOrigin({ 25.f, 25.f });
-        m_toggleBtn.setPosition({ static_cast<float>(Config::WINDOW_WIDTH) - 40.f, 40.f });
+        m_toggleBtn.setSize({50.f, 50.f});
+        m_toggleBtn.setOrigin({25.f, 25.f});
+        m_toggleBtn.setPosition({static_cast<float>(Config::WINDOW_WIDTH) - 40.f, 40.f});
         m_toggleBtn.setFillColor(sf::Color(100, 100, 200));
         m_toggleBtn.setOutlineThickness(2.f);
 
         // 背包面板
-        m_panelBg.setSize({ 300.f, 400.f });
-        m_panelBg.setPosition({ static_cast<float>(Config::WINDOW_WIDTH) - 320.f, 80.f });
+        m_panelBg.setSize({300.f, 400.f});
+        m_panelBg.setPosition({static_cast<float>(Config::WINDOW_WIDTH) - 320.f, 80.f});
         m_panelBg.setFillColor(sf::Color(30, 30, 30, 240));
         m_panelBg.setOutlineThickness(2.f);
 
@@ -33,9 +32,9 @@ public:
         float panelW = m_panelBg.getSize().x;
         float panelH = m_panelBg.getSize().y;
 
-        m_trashSlot.setSize({ 60.f, 60.f });
-        m_trashSlot.setOrigin({ 30.f, 30.f });
-        m_trashSlot.setPosition({ panelX + panelW - 50.f, panelY + panelH - 50.f });
+        m_trashSlot.setSize({60.f, 60.f});
+        m_trashSlot.setOrigin({30.f, 30.f});
+        m_trashSlot.setPosition({panelX + panelW - 50.f, panelY + panelH - 50.f});
         m_trashSlot.setFillColor(sf::Color(200, 50, 50));
         m_trashSlot.setOutlineColor(sf::Color::White);
         m_trashSlot.setOutlineThickness(2.f);
@@ -44,7 +43,7 @@ public:
         m_trashText.setCharacterSize(14);
         m_trashText.setFillColor(sf::Color::White);
         sf::FloatRect textBounds = m_trashText.getLocalBounds();
-        m_trashText.setOrigin({ textBounds.size.x / 2.f, textBounds.size.y / 2.f });
+        m_trashText.setOrigin({textBounds.size.x / 2.f, textBounds.size.y / 2.f});
         m_trashText.setPosition(m_trashSlot.getPosition());
 
         // Tooltip
@@ -53,13 +52,13 @@ public:
         m_tooltipText.setFillColor(sf::Color::White);
 
         m_draggedIcon.setRadius(15.f);
-        m_draggedIcon.setOrigin({ 15.f, 15.f });
+        m_draggedIcon.setOrigin({15.f, 15.f});
     }
 
     void update(sf::Time dt) {
-        for (auto it = m_floatingTexts.begin(); it != m_floatingTexts.end(); ) {
+        for (auto it = m_floatingTexts.begin(); it != m_floatingTexts.end();) {
             it->lifeTime -= dt.asSeconds();
-            it->text.move({ 0.f, -50.f * dt.asSeconds() });
+            it->text.move({0.f, -50.f * dt.asSeconds()});
 
             sf::Color c = it->text.getFillColor();
             // 修正：使用 std::uint8_t 取代 sf::Uint8
@@ -68,8 +67,7 @@ public:
 
             if (it->lifeTime <= 0.f) {
                 it = m_floatingTexts.erase(it);
-            }
-            else {
+            } else {
                 ++it;
             }
         }
@@ -98,8 +96,7 @@ public:
 
             if (m_isDragging) {
                 window.draw(m_draggedIcon);
-            }
-            else if (m_showTooltip) {
+            } else if (m_showTooltip) {
                 window.draw(m_tooltipBg);
                 window.draw(m_tooltipText);
             }
@@ -108,7 +105,7 @@ public:
 
     void close() {
         m_isOpen = false;
-        m_isDragging = false; // 關閉時也要取消拖曳狀態，避免 Bug
+        m_isDragging = false;  // 關閉時也要取消拖曳狀態，避免 Bug
         m_draggedIndex = -1;
     }
 
@@ -135,7 +132,7 @@ public:
             float x = startX + col * (cellSize + padding);
             float y = startY + row * (cellSize + padding);
 
-            sf::FloatRect cellBounds({ x, y }, { cellSize, cellSize });
+            sf::FloatRect cellBounds({x, y}, {cellSize, cellSize});
             if (cellBounds.contains(mousePos)) {
                 Accessory data = AccessoryData::get(m_stats.accessories[i]);
                 showTooltip(data, mousePos);
@@ -166,7 +163,7 @@ public:
                 float x = startX + col * (cellSize + padding);
                 float y = startY + row * (cellSize + padding);
 
-                sf::FloatRect cellBounds({ x, y }, { cellSize, cellSize });
+                sf::FloatRect cellBounds({x, y}, {cellSize, cellSize});
                 if (cellBounds.contains(mousePos)) {
                     m_isDragging = true;
                     m_draggedIndex = static_cast<int>(i);
@@ -202,7 +199,7 @@ public:
         return false;
     }
 
-private:
+   private:
     const sf::Font& m_font;
     PlayerStats& m_stats;
 
@@ -271,8 +268,8 @@ private:
         ft.text.setOutlineThickness(1.f);
 
         sf::FloatRect bounds = ft.text.getLocalBounds();
-        ft.text.setOrigin({ bounds.size.x / 2.f, bounds.size.y / 2.f });
-        ft.text.setPosition({ pos.x, pos.y - 20.f });
+        ft.text.setOrigin({bounds.size.x / 2.f, bounds.size.y / 2.f});
+        ft.text.setPosition({pos.x, pos.y - 20.f});
 
         m_floatingTexts.push_back(std::move(ft));
     }
@@ -293,15 +290,14 @@ private:
             float y = startY + row * (cellSize + padding);
             AccessoryType currentType = m_stats.accessories[i];
 
-            sf::RectangleShape cell({ cellSize, cellSize });
-            cell.setPosition({ x, y });
+            sf::RectangleShape cell({cellSize, cellSize});
+            cell.setPosition({x, y});
             cell.setFillColor(sf::Color(50, 50, 50));
 
             if (m_stats.isAccessoryActive(currentType)) {
                 cell.setOutlineColor(sf::Color::Green);
                 cell.setOutlineThickness(3.f);
-            }
-            else {
+            } else {
                 cell.setOutlineColor(sf::Color::White);
                 cell.setOutlineThickness(1.f);
             }
@@ -310,8 +306,8 @@ private:
 
             Accessory data = AccessoryData::get(currentType);
             sf::CircleShape icon(15.f);
-            icon.setOrigin({ 15.f, 15.f });
-            icon.setPosition({ x + cellSize / 2.f, y + cellSize / 2.f });
+            icon.setOrigin({15.f, 15.f});
+            icon.setPosition({x + cellSize / 2.f, y + cellSize / 2.f});
 
             sf::Color iconColor = data.color;
             if (isBeingDragged) {
@@ -328,8 +324,8 @@ private:
         m_tooltipText.setString(std::format("{}\nPrice: ${}\n{}\n{}", data.name, data.price, status, data.description));
 
         sf::FloatRect bounds = m_tooltipText.getLocalBounds();
-        m_tooltipBg.setSize({ bounds.size.x + 20.f, bounds.size.y + 20.f });
-        m_tooltipBg.setPosition({ mousePos.x + 15.f, mousePos.y + 15.f });
-        m_tooltipText.setPosition({ mousePos.x + 25.f, mousePos.y + 25.f });
+        m_tooltipBg.setSize({bounds.size.x + 20.f, bounds.size.y + 20.f});
+        m_tooltipBg.setPosition({mousePos.x + 15.f, mousePos.y + 15.f});
+        m_tooltipText.setPosition({mousePos.x + 25.f, mousePos.y + 25.f});
     }
 };

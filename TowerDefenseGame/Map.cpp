@@ -5,15 +5,15 @@
 
 Map::Map(sf::Vector2u gridSize, float tileSize)
     : m_gridSize(gridSize),
-    m_tileSize(tileSize),
-    m_heat(gridSize.x* gridSize.y, 0.f),
-    m_vertices(sf::PrimitiveType::Triangles) {
+      m_tileSize(tileSize),
+      m_heat(gridSize.x * gridSize.y, 0.f),
+      m_vertices(sf::PrimitiveType::Triangles) {
     buildVertices();
 }
 
 void Map::buildVertices() {
     m_vertices.clear();
-    m_vertices.resize(static_cast<std::size_t>(m_gridSize.x) * m_gridSize.y * 6); // 6 verts per tile (2 triangles)
+    m_vertices.resize(static_cast<std::size_t>(m_gridSize.x) * m_gridSize.y * 6);  // 6 verts per tile (2 triangles)
     std::size_t idx = 0;
     for (unsigned y = 0; y < m_gridSize.y; ++y) {
         for (unsigned x = 0; x < m_gridSize.x; ++x) {
@@ -23,14 +23,14 @@ void Map::buildVertices() {
             float bottom = top + m_tileSize;
 
             // Triangle 1
-            m_vertices[idx++].position = { left, top };
-            m_vertices[idx++].position = { right, top };
-            m_vertices[idx++].position = { right, bottom };
+            m_vertices[idx++].position = {left, top};
+            m_vertices[idx++].position = {right, top};
+            m_vertices[idx++].position = {right, bottom};
 
             // Triangle 2
-            m_vertices[idx++].position = { left, top };
-            m_vertices[idx++].position = { right, bottom };
-            m_vertices[idx++].position = { left, bottom };
+            m_vertices[idx++].position = {left, top};
+            m_vertices[idx++].position = {right, bottom};
+            m_vertices[idx++].position = {left, bottom};
         }
     }
     // initial colors
@@ -42,7 +42,7 @@ sf::Vector2u Map::worldToTile(const sf::Vector2f& worldPos) const {
     int ty = static_cast<int>(std::floor(worldPos.y / m_tileSize));
     tx = std::clamp(tx, 0, static_cast<int>(m_gridSize.x) - 1);
     ty = std::clamp(ty, 0, static_cast<int>(m_gridSize.y) - 1);
-    return { static_cast<unsigned>(tx), static_cast<unsigned>(ty) };
+    return {static_cast<unsigned>(tx), static_cast<unsigned>(ty)};
 }
 
 void Map::addPosition(const sf::Vector2f& worldPos, float weight) {
@@ -65,7 +65,7 @@ void Map::addPath(const std::vector<sf::Vector2f>& worldPath) {
         int steps = std::max(1, static_cast<int>(dist / (m_tileSize * 0.5f)));
         for (int s = 0; s <= steps; ++s) {
             float t = steps ? (static_cast<float>(s) / steps) : 0.f;
-            sf::Vector2f p{ a.x + dx * t, a.y + dy * t };
+            sf::Vector2f p{a.x + dx * t, a.y + dy * t};
             addPosition(p, 1.f);
         }
     }
@@ -80,7 +80,7 @@ void Map::decay(float factor) {
         v *= factor;
         if (v > m_maxHeat) m_maxHeat = v;
     }
-    if (m_maxHeat < 1e-6f) m_maxHeat = 1.f; // avoid div0
+    if (m_maxHeat < 1e-6f) m_maxHeat = 1.f;  // avoid div0
     updateColors();
 }
 
@@ -107,7 +107,8 @@ sf::Color Map::colorForValue(float normalized) const {
 void Map::updateColors() {
     // 找最大值（已由 addPosition/decay 維護，但保險起見再計算一次）
     float maxv = 0.f;
-    for (float v : m_heat) if (v > maxv) maxv = v;
+    for (float v : m_heat)
+        if (v > maxv) maxv = v;
     if (maxv <= 0.f) maxv = 1.f;
     // 為每一個 tile 填色（對應到 6 vertices）
     std::size_t vi = 0;

@@ -1,5 +1,7 @@
 #include "WaveManager.hpp"
+
 #include <iostream>
+
 #include "Utils.hpp"
 
 WaveManager::WaveManager(std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<sf::Vector2f>& path, PlayerStats& stats)
@@ -27,13 +29,11 @@ void WaveManager::configureWave(int wave) {
         m_enemiesToSpawn = 1;
         m_spawnInterval = 1.0f;
         m_currentEnemyType = EnemyType::FinalBoss;
-    }
-    else if (wave % 5 == 0) {
+    } else if (wave % 5 == 0) {
         m_enemiesToSpawn = 1 + (wave / 5);
         m_spawnInterval = 2.0f;
         m_currentEnemyType = EnemyType::MiniBoss;
-    }
-    else {
+    } else {
         // ÀH¾÷ªi¦¸
         m_enemiesToSpawn = 5 + wave * 2;
         m_spawnInterval = std::max(0.3f, 1.0f - (wave * 0.05f));
@@ -50,21 +50,17 @@ void WaveManager::update(sf::Time dt) {
 
     if (m_spawnTimer >= m_spawnInterval) {
         if (m_enemiesToSpawn > 0) {
-
             EnemyType typeToSpawn = m_currentEnemyType;
 
             if (m_isRandomWave) {
                 int r = Utils::m_rand();
                 if (r < 30) {
                     typeToSpawn = EnemyType::Normal;
-                }
-                else if (r < 55) {
+                } else if (r < 55) {
                     typeToSpawn = EnemyType::Fast;
-                }
-                else if (r < 80) {
+                } else if (r < 80) {
                     typeToSpawn = EnemyType::Triangle;
-                }
-                else {
+                } else {
                     typeToSpawn = EnemyType::Square;
                 }
             }
@@ -72,8 +68,7 @@ void WaveManager::update(sf::Time dt) {
             m_gameEnemies.push_back(std::make_shared<Enemy>(m_path, typeToSpawn, m_playerStats.hasGambler));
             m_enemiesToSpawn--;
             m_spawnTimer = 0.f;
-        }
-        else {
+        } else {
             m_spawning = false;
         }
     }

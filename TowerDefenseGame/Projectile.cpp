@@ -1,25 +1,27 @@
 #include "Projectile.hpp"
 
-#include <iostream> // for debug
+#include <iostream>  // for debug
 
 #include "Enemy.hpp"
 #include "Utils.hpp"
 
 Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target,
-    const std::vector<std::shared_ptr<Enemy>>& enemies,
-    int damage, bool isFire, bool isIce, bool isExplosive)
-    : m_target(target), m_enemies(enemies), m_damage(damage),
-    m_isFire(isFire), m_isIce(isIce), m_isExplosive(isExplosive)
-{
+                       const std::vector<std::shared_ptr<Enemy>>& enemies,
+                       int damage, bool isFire, bool isIce, bool isExplosive)
+    : m_target(target), m_enemies(enemies), m_damage(damage), m_isFire(isFire), m_isIce(isIce), m_isExplosive(isExplosive) {
     m_shape.setRadius(5.f);
-    m_shape.setOrigin({ 5.f, 5.f });
+    m_shape.setOrigin({5.f, 5.f});
     m_shape.setPosition(startPos);
 
     // ®Ú¾Ú®ÄªG§ïÅÜÃC¦â
-    if (m_isExplosive) m_shape.setFillColor(sf::Color(139, 0, 0)); // ²`¬õ
-    else if (m_isIce) m_shape.setFillColor(sf::Color::Cyan);       // «C¦â
-    else if (m_isFire) m_shape.setFillColor(sf::Color(255, 69, 0)); // ¾ï¬õ
-    else m_shape.setFillColor(sf::Color::Yellow);
+    if (m_isExplosive)
+        m_shape.setFillColor(sf::Color(139, 0, 0));  // ²`¬õ
+    else if (m_isIce)
+        m_shape.setFillColor(sf::Color::Cyan);  // «C¦â
+    else if (m_isFire)
+        m_shape.setFillColor(sf::Color(255, 69, 0));  // ¾ï¬õ
+    else
+        m_shape.setFillColor(sf::Color::Yellow);
 }
 
 void Projectile::update(sf::Time dt) {
@@ -46,8 +48,8 @@ void Projectile::update(sf::Time dt) {
 
         // 4. Ãzµõ®ÄªG (¤p½d³ò AOE)
         if (m_isExplosive) {
-            float range = 100.f; // Ãz¬µ¥b®|
-            int explosionDmg = m_damage * 2; // 200% ¶Ë®`
+            float range = 100.f;              // Ãz¬µ¥b®|
+            int explosionDmg = m_damage * 2;  // 200% ¶Ë®`
 
             for (const auto& enemy : m_enemies) {
                 if (enemy->isActive() && Utils::distance(m_shape.getPosition(), enemy->getPosition()) <= range) {

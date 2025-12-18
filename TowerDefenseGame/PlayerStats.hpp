@@ -18,15 +18,14 @@ struct PlayerStats {
     std::vector<AccessoryType> accessories;
     AccessoryType activeAccessory = AccessoryType::None;
 
-	//Extreme Gambler Event
+    // Extreme Gambler Event
     bool hasGambler = false;
     bool hasTriggeredGamblerEvent = false;
 
     void equipAccessory(AccessoryType type) {
         if (activeAccessory == type) {
             activeAccessory = AccessoryType::None;
-        }
-        else {
+        } else {
             activeAccessory = type;
         }
     }

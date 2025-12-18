@@ -2,19 +2,24 @@
 #include <SFML/System/Time.hpp>
 #include <memory>
 #include <vector>
+
 #include "Enemy.hpp"
 #include "PlayerStats.hpp"
 
 class WaveManager {
-public:
+   public:
     WaveManager(std::vector<std::shared_ptr<Enemy>>& enemies, const std::vector<sf::Vector2f>& path, PlayerStats& stats);
 
     void update(sf::Time dt);
     void startNextWave();
 
     bool isWaveInProgress() const { return m_spawning || m_enemiesAlive > 0; }
-    void notifyEnemyDeath() { if (m_enemiesAlive > 0) m_enemiesAlive--; }
-    void notifyEnemyReachedEnd() { if (m_enemiesAlive > 0) m_enemiesAlive--; }
+    void notifyEnemyDeath() {
+        if (m_enemiesAlive > 0) m_enemiesAlive--;
+    }
+    void notifyEnemyReachedEnd() {
+        if (m_enemiesAlive > 0) m_enemiesAlive--;
+    }
 
     void forceEndWave() {
         m_spawning = false;
@@ -22,7 +27,7 @@ public:
         m_spawnTimer = 0.f;
     }
 
-private:
+   private:
     std::vector<std::shared_ptr<Enemy>>& m_gameEnemies;
     const std::vector<sf::Vector2f>& m_path;
     PlayerStats& m_playerStats;
@@ -33,7 +38,7 @@ private:
         EnemyType type;
     };
 
-    int m_currentWaveIndex = 18; //[0 ~ 19]
+    int m_currentWaveIndex = 18;  //[0 ~ 19]
     bool m_spawning = false;
     float m_spawnTimer = 0.f;
     float m_spawnInterval = 1.0f;

@@ -3,7 +3,7 @@
 #include <vector>
 
 class Map : public sf::Drawable {
-public:
+   public:
     Map() = default;
     // gridSize: {cols, rows}, tileSize: 像素
     Map(sf::Vector2u gridSize, float tileSize);
@@ -29,16 +29,14 @@ public:
     // Drawable override
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
-private:
+   private:
     void buildVertices();
-    void updateColors(); // 用 m_heat->m_vertices.colors
-    sf::Color colorForValue(float normalized) const; // 0..1
-
-    
+    void updateColors();                              // 用 m_heat->m_vertices.colors
+    sf::Color colorForValue(float normalized) const;  // 0..1
 
     sf::Vector2u m_gridSize;
     float m_tileSize;
-    std::vector<float> m_heat; // size = cols*rows
-    sf::VertexArray m_vertices; // PrimitiveType::Triangles, 每格 6 個 vertices
-    float m_maxHeat{ 1.f };
+    std::vector<float> m_heat;   // size = cols*rows
+    sf::VertexArray m_vertices;  // PrimitiveType::Triangles, 每格 6 個 vertices
+    float m_maxHeat{1.f};
 };

@@ -5,10 +5,10 @@
 #include "Utils.hpp"
 
 class Loot : public Entity {
-public:
+   public:
     Loot(sf::Vector2f startPos, AccessoryType type) : m_type(type) {
         m_shape.setRadius(10.f);
-        m_shape.setOrigin({ 10.f, 10.f });
+        m_shape.setOrigin({10.f, 10.f});
         m_shape.setPosition(startPos);
 
         auto data = AccessoryData::get(type);
@@ -16,7 +16,7 @@ public:
         m_shape.setOutlineColor(sf::Color::White);
         m_shape.setOutlineThickness(2.f);
 
-        m_targetPos = { static_cast<float>(Config::WINDOW_WIDTH - 40), 40.f };
+        m_targetPos = {static_cast<float>(Config::WINDOW_WIDTH - 40), 40.f};
     }
 
     void update(sf::Time dt) override {
@@ -27,8 +27,7 @@ public:
         if (dist < 10.f) {
             m_arrived = true;
             destroy();
-        }
-        else {
+        } else {
             m_shape.move(Utils::normalize(dir) * speed * dt.asSeconds());
         }
     }
@@ -45,7 +44,7 @@ public:
     bool hasArrived() const { return m_arrived; }
     AccessoryType getType() const { return m_type; }
 
-private:
+   private:
     sf::CircleShape m_shape;
     sf::Vector2f m_targetPos;
     AccessoryType m_type;

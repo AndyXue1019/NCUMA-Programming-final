@@ -21,13 +21,12 @@ struct TowerInfo {
 };
 
 namespace TowerData {
-    inline const std::map<TowerType, TowerInfo> INFO = {
-        {TowerType::Basic, {"Basic", 50, 1, sf::Color::White}},
-        {TowerType::Laser, {"Laser", 120, 1, sf::Color::Red}},
-        {TowerType::Sniper, {"Sniper", 200, 2, sf::Color::Green}},
-        {TowerType::Slow, {"Slow", 150, 2, sf::Color(0, 255, 255)}},
-        {TowerType::Teleport, {"Teleport", 300, 3, sf::Color::Magenta}},
-        {TowerType::SelfDestruct, {"Mine", 100, 1, sf::Color(50, 50, 50)}},
-        {TowerType::Gambler, {"God of Gamblers", 0, 999, sf::Color(255, 215, 0)}}
-    };
+inline const std::map<TowerType, TowerInfo> INFO = {
+    {TowerType::Basic, {"Basic", 50, 1, sf::Color::White}},
+    {TowerType::Laser, {"Laser", 120, 1, sf::Color::Red}},
+    {TowerType::Sniper, {"Sniper", 200, 2, sf::Color::Green}},
+    {TowerType::Slow, {"Slow", 150, 2, sf::Color(0, 255, 255)}},
+    {TowerType::Teleport, {"Teleport", 300, 3, sf::Color::Magenta}},
+    {TowerType::SelfDestruct, {"Mine", 100, 1, sf::Color(50, 50, 50)}},
+    {TowerType::Gambler, {"God of Gamblers", 0, 999, sf::Color(255, 215, 0)}}};
 }

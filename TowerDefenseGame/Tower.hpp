@@ -1,9 +1,10 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
-#include <functional>
+
 #include "Config.hpp"
 #include "Enemy.hpp"
 #include "Entity.hpp"
@@ -14,11 +15,11 @@
 struct PlayerStats;
 
 class Tower : public Entity {
-public:
+   public:
     Tower(sf::Vector2f pos,
-        const std::vector<std::shared_ptr<Enemy>>& enemies,
-        std::vector<std::unique_ptr<Projectile>>& projectiles,
-        PlayerStats& stats);
+          const std::vector<std::shared_ptr<Enemy>>& enemies,
+          std::vector<std::unique_ptr<Projectile>>& projectiles,
+          PlayerStats& stats);
 
     virtual ~Tower() = default;
 
@@ -44,7 +45,7 @@ public:
     using TextCallback = std::function<void(std::string, sf::Vector2f, sf::Color)>;
     void setTextCallback(TextCallback cb) { m_onTextRequest = cb; }
 
-protected:
+   protected:
     virtual void performAction() = 0;
     std::shared_ptr<Enemy> findTarget(float range);
 
@@ -57,7 +58,7 @@ protected:
     PlayerStats& m_stats;
 
     std::string m_name;
-    TowerType m_type;
+    TowerType m_type = TowerType::Basic;
     float m_range = 150.f;
     float m_cooldownTime = 1.0f;
     float m_currentCooldown = 0.f;

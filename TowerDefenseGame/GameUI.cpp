@@ -11,24 +11,23 @@ static const sf::Color GOLD_COLOR(255, 215, 0);
 
 GameUI::GameUI(const sf::Font& font, PlayerStats& stats)
     : m_font(font),
-    m_playerStats(stats),
-    m_infoText(font),
-    m_promptText(font),
-    m_txtYes(font),
-    m_txtNo(font),
-    m_hpText(font),
-    m_heartBg(m_heartTexture),
-    m_heartFill(m_heartTexture)
-{
-    m_bg.setSize({ static_cast<float>(Config::WINDOW_WIDTH), BAR_HEIGHT });
-    m_bg.setPosition({ 0.f, static_cast<float>(Config::WINDOW_HEIGHT) - BAR_HEIGHT });
+      m_playerStats(stats),
+      m_infoText(font),
+      m_promptText(font),
+      m_txtYes(font),
+      m_txtNo(font),
+      m_hpText(font),
+      m_heartBg(m_heartTexture),
+      m_heartFill(m_heartTexture) {
+    m_bg.setSize({static_cast<float>(Config::WINDOW_WIDTH), BAR_HEIGHT});
+    m_bg.setPosition({0.f, static_cast<float>(Config::WINDOW_HEIGHT) - BAR_HEIGHT});
     m_bg.setFillColor(sf::Color(30, 30, 30));
     m_bg.setOutlineColor(sf::Color::White);
     m_bg.setOutlineThickness(2.f);
 
     m_infoText.setCharacterSize(18);
     m_infoText.setFillColor(sf::Color::Yellow);
-    m_infoText.setPosition({ 20.f, static_cast<float>(Config::WINDOW_HEIGHT) - BAR_HEIGHT + 10.f });
+    m_infoText.setPosition({20.f, static_cast<float>(Config::WINDOW_HEIGHT) - BAR_HEIGHT + 10.f});
 
     // 產生愛心並設定位置
     createHeartTexture();
@@ -38,11 +37,11 @@ GameUI::GameUI(const sf::Font& font, PlayerStats& stats)
     float heartY = static_cast<float>(Config::WINDOW_HEIGHT) - 110.f;
 
     // Sprite 已經綁定 Texture，這裡只要設定位置顏色
-    m_heartBg.setPosition({ heartX, heartY });
-    m_heartBg.setColor(sf::Color(50, 0, 0, 150)); // 深紅色半透明 (背景)
+    m_heartBg.setPosition({heartX, heartY});
+    m_heartBg.setColor(sf::Color(50, 0, 0, 150));  // 深紅色半透明 (背景)
 
-    m_heartFill.setPosition({ heartX, heartY });
-    m_heartFill.setColor(sf::Color(255, 0, 0));   // 亮紅色 (血量)
+    m_heartFill.setPosition({heartX, heartY});
+    m_heartFill.setColor(sf::Color(255, 0, 0));  // 亮紅色 (血量)
 
     // 血量文字 (顯示在愛心中央)
     m_hpText.setCharacterSize(20);
@@ -67,8 +66,8 @@ void GameUI::initButtons() {
 
         Button btn(m_font);
         btn.type = type;
-        btn.shape.setSize({ btnSize, btnSize });
-        btn.shape.setPosition({ startX + i * (btnSize + gap), yPos });
+        btn.shape.setSize({btnSize, btnSize});
+        btn.shape.setPosition({startX + i * (btnSize + gap), yPos});
         btn.shape.setFillColor(sf::Color(60, 60, 60));
         btn.shape.setOutlineThickness(2.f);
         btn.shape.setOutlineColor(info.color);
@@ -76,11 +75,11 @@ void GameUI::initButtons() {
         btn.label.setString(info.name);
         btn.label.setCharacterSize(14);
         btn.label.setFillColor(info.color);
-        btn.label.setPosition({ btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 5.f });
+        btn.label.setPosition({btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 5.f});
 
         btn.subLabel.setCharacterSize(14);
         btn.subLabel.setFillColor(sf::Color::White);
-        btn.subLabel.setPosition({ btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 65.f });
+        btn.subLabel.setPosition({btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 65.f});
 
         m_buttons.push_back(std::move(btn));
         i++;
@@ -90,9 +89,9 @@ void GameUI::initButtons() {
 void GameUI::initPrompt() {
     float w = 600.f;
     float h = 300.f;
-    m_promptBg.setSize({ w, h });
-    m_promptBg.setOrigin({ w / 2, h / 2 });
-    m_promptBg.setPosition({ Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT / 2.f });
+    m_promptBg.setSize({w, h});
+    m_promptBg.setOrigin({w / 2, h / 2});
+    m_promptBg.setPosition({Config::WINDOW_WIDTH / 2.f, Config::WINDOW_HEIGHT / 2.f});
     m_promptBg.setFillColor(sf::Color(20, 20, 20, 240));
     m_promptBg.setOutlineThickness(3.f);
     m_promptBg.setOutlineColor(GOLD_COLOR);
@@ -102,38 +101,39 @@ void GameUI::initPrompt() {
     m_promptText.setFillColor(sf::Color::White);
 
     sf::FloatRect textBounds = m_promptText.getLocalBounds();
-    m_promptText.setOrigin({ textBounds.size.x / 2, textBounds.size.y / 2 });
-    m_promptText.setPosition({ m_promptBg.getPosition().x, m_promptBg.getPosition().y - 50.f });
+    m_promptText.setOrigin({textBounds.size.x / 2, textBounds.size.y / 2});
+    m_promptText.setPosition({m_promptBg.getPosition().x, m_promptBg.getPosition().y - 50.f});
 
     // Yes Button
-    m_btnYes.setSize({ 150.f, 60.f });
-    m_btnYes.setOrigin({ 75.f, 30.f });
-    m_btnYes.setPosition({ m_promptBg.getPosition().x - 100.f, m_promptBg.getPosition().y + 80.f });
+    m_btnYes.setSize({150.f, 60.f});
+    m_btnYes.setOrigin({75.f, 30.f});
+    m_btnYes.setPosition({m_promptBg.getPosition().x - 100.f, m_promptBg.getPosition().y + 80.f});
     m_btnYes.setFillColor(sf::Color(0, 150, 0));
 
     m_txtYes.setString("YES");
     m_txtYes.setCharacterSize(24);
     sf::FloatRect yb = m_txtYes.getLocalBounds();
-    m_txtYes.setOrigin({ yb.size.x / 2, yb.size.y / 2 });
+    m_txtYes.setOrigin({yb.size.x / 2, yb.size.y / 2});
     m_txtYes.setPosition(m_btnYes.getPosition());
 
     // No Button
-    m_btnNo.setSize({ 150.f, 60.f });
-    m_btnNo.setOrigin({ 75.f, 30.f });
-    m_btnNo.setPosition({ m_promptBg.getPosition().x + 100.f, m_promptBg.getPosition().y + 80.f });
+    m_btnNo.setSize({150.f, 60.f});
+    m_btnNo.setOrigin({75.f, 30.f});
+    m_btnNo.setPosition({m_promptBg.getPosition().x + 100.f, m_promptBg.getPosition().y + 80.f});
     m_btnNo.setFillColor(sf::Color(150, 0, 0));
 
     m_txtNo.setString("NO");
     m_txtNo.setCharacterSize(24);
     sf::FloatRect nb = m_txtNo.getLocalBounds();
-    m_txtNo.setOrigin({ nb.size.x / 2, nb.size.y / 2 });
+    m_txtNo.setOrigin({nb.size.x / 2, nb.size.y / 2});
     m_txtNo.setPosition(m_btnNo.getPosition());
 }
 
 void GameUI::updateButtons(bool isShopPhase) {
     if (m_playerStats.hasGambler) {
         bool hasGamblerBtn = false;
-        for (auto& btn : m_buttons) if (btn.type == TowerType::Gambler) hasGamblerBtn = true;
+        for (auto& btn : m_buttons)
+            if (btn.type == TowerType::Gambler) hasGamblerBtn = true;
 
         if (!hasGamblerBtn) {
             Button btn(m_font);
@@ -143,18 +143,18 @@ void GameUI::updateButtons(bool isShopPhase) {
             float startX = 250.f + 6 * (btnSize + gap);
             float yPos = static_cast<float>(Config::WINDOW_HEIGHT) - BAR_HEIGHT + 15.f;
 
-            btn.shape.setSize({ btnSize, btnSize });
-            btn.shape.setPosition({ startX, yPos });
+            btn.shape.setSize({btnSize, btnSize});
+            btn.shape.setPosition({startX, yPos});
             btn.shape.setFillColor(sf::Color::Black);
             btn.shape.setOutlineThickness(2.f);
             btn.shape.setOutlineColor(GOLD_COLOR);
 
             btn.label.setString("GOD");
-            btn.label.setPosition({ btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 5.f });
+            btn.label.setPosition({btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 5.f});
             btn.label.setFillColor(GOLD_COLOR);
 
             btn.subLabel.setString("x1");
-            btn.subLabel.setPosition({ btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 65.f });
+            btn.subLabel.setPosition({btn.shape.getPosition().x + 5.f, btn.shape.getPosition().y + 65.f});
 
             m_buttons.push_back(std::move(btn));
         }
@@ -177,8 +177,7 @@ void GameUI::updateButtons(bool isShopPhase) {
             if (count > 0) {
                 btn.subLabel.setString("OWNED");
                 btn.subLabel.setFillColor(sf::Color::Green);
-            }
-            else {
+            } else {
                 btn.locked = true;
                 btn.shape.setFillColor(sf::Color::Black);
                 btn.subLabel.setString("LOCKED");
@@ -193,8 +192,7 @@ void GameUI::updateButtons(bool isShopPhase) {
             btn.shape.setFillColor(sf::Color(100, 30, 30));
             btn.subLabel.setString(std::format("Lv.{}", info.requiredLevel));
             btn.subLabel.setFillColor(sf::Color::Red);
-        }
-        else {
+        } else {
             btn.locked = false;
             btn.shape.setFillColor(sf::Color(60, 60, 60));
 
@@ -204,8 +202,7 @@ void GameUI::updateButtons(bool isShopPhase) {
                     btn.subLabel.setFillColor(sf::Color::Red);
                 else
                     btn.subLabel.setFillColor(sf::Color::Green);
-            }
-            else {
+            } else {
                 int count = m_playerStats.inventory[btn.type];
                 btn.subLabel.setString(std::format("x{}", count));
                 btn.subLabel.setFillColor(count > 0 ? sf::Color::White : sf::Color(150, 150, 150));
@@ -217,7 +214,7 @@ void GameUI::updateButtons(bool isShopPhase) {
 void GameUI::createHeartTexture() {
     sf::Image img;
     // SFML 3.0 使用 resize
-    img.resize({ 100, 100 }, sf::Color::Transparent);
+    img.resize({100, 100}, sf::Color::Transparent);
 
     float cx = 50.f;
     float cy = 55.f;
@@ -230,7 +227,7 @@ void GameUI::createHeartTexture() {
 
             float a = nx * nx + ny * ny - 1.f;
             if (a * a * a - nx * nx * ny * ny * ny <= 0.f) {
-                img.setPixel({ x, y }, sf::Color::White);
+                img.setPixel({x, y}, sf::Color::White);
             }
         }
     }
@@ -245,7 +242,7 @@ void GameUI::draw(sf::RenderWindow& window, bool isShopPhase) {
     window.draw(m_bg);
     std::string stateStr = isShopPhase ? "[SHOP PHASE]" : "[WAVE INCOMING]";
     std::string info = std::format("{}\nGold: {}\nLevel: {} Stars",
-        stateStr, m_playerStats.gold, m_playerStats.level);
+                                   stateStr, m_playerStats.gold, m_playerStats.level);
     m_infoText.setString(info);
     window.draw(m_infoText);
 
@@ -270,17 +267,17 @@ void GameUI::draw(sf::RenderWindow& window, bool isShopPhase) {
     int fillHeight = static_cast<int>(texH * pct);
     int topOffset = texH - fillHeight;
 
-    m_heartFill.setTextureRect(sf::IntRect({ 0, topOffset }, { static_cast<int>(texW), fillHeight }));
+    m_heartFill.setTextureRect(sf::IntRect({0, topOffset}, {static_cast<int>(texW), fillHeight}));
 
     sf::Vector2f basePos = m_heartBg.getPosition();
-    m_heartFill.setPosition({ basePos.x, basePos.y + topOffset });
+    m_heartFill.setPosition({basePos.x, basePos.y + topOffset});
 
     window.draw(m_heartFill);
 
     m_hpText.setString(std::format("{}%", static_cast<int>(pct * 100)));
     sf::FloatRect textBounds = m_hpText.getLocalBounds();
-    m_hpText.setOrigin({ textBounds.size.x / 2.f, textBounds.size.y / 2.f });
-    m_hpText.setPosition({ basePos.x + 50.f, basePos.y + 50.f });
+    m_hpText.setOrigin({textBounds.size.x / 2.f, textBounds.size.y / 2.f});
+    m_hpText.setPosition({basePos.x + 50.f, basePos.y + 50.f});
     window.draw(m_hpText);
 }
 

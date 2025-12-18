@@ -5,15 +5,14 @@
 #include "Utils.hpp"
 
 Tower::Tower(sf::Vector2f pos,
-    const std::vector<std::shared_ptr<Enemy>>& enemies,
-    std::vector<std::unique_ptr<Projectile>>& projectiles,
-    PlayerStats& stats)
+             const std::vector<std::shared_ptr<Enemy>>& enemies,
+             std::vector<std::unique_ptr<Projectile>>& projectiles,
+             PlayerStats& stats)
     : m_enemies(enemies),
-    m_projectiles(projectiles),
-    m_stats(stats)
-{
-    m_shape.setSize({ 40.f, 40.f });
-    m_shape.setOrigin({ 20.f, 20.f });
+      m_projectiles(projectiles),
+      m_stats(stats) {
+    m_shape.setSize({40.f, 40.f});
+    m_shape.setOrigin({20.f, 20.f});
     m_shape.setPosition(pos);
 }
 

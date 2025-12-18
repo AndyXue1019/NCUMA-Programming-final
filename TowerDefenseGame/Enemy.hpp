@@ -14,7 +14,7 @@ enum class EnemyType {
 };
 
 class Enemy : public Entity {
-public:
+   public:
     Enemy(const std::vector<sf::Vector2f>& path, EnemyType type, bool isGamblerMode = false);
 
     void update(sf::Time dt) override;
@@ -31,13 +31,13 @@ public:
     int getBounty() const { return m_bounty; }
     int getExp() const { return m_expReward; }
 
-private:
+   private:
     sf::CircleShape m_shape;
     std::vector<sf::Vector2f> m_path;
     std::size_t m_currentWaypointIndex = 0;
 
     // 用來記錄這隻敵人的類型，以便在 update 中判斷特殊行為
-    EnemyType m_type; // [新增]
+    EnemyType m_type;  // [新增]
 
     float m_speed = 100.f;
     int m_maxHp = 50;
@@ -59,7 +59,7 @@ private:
     float m_stunTimer = 0.f;
 
     // --- [新增] 方形敵人的衝刺相關變數 ---
-    bool m_isDashing = false;      // 是否正在衝刺
-    float m_dashDurationTimer = 0.f; // 衝刺持續時間 (0.5s)
-    float m_dashCheckTimer = 0.f;    // 每隔多久檢查一次是否要衝刺
+    bool m_isDashing = false;         // 是否正在衝刺
+    float m_dashDurationTimer = 0.f;  // 衝刺持續時間 (0.5s)
+    float m_dashCheckTimer = 0.f;     // 每隔多久檢查一次是否要衝刺
 };

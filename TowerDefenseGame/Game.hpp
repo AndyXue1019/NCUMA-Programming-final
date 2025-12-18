@@ -28,12 +28,13 @@ enum class GameState {
 };
 
 class Game {
-public:
+   public:
     Game();
     void run();
 
-    void spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size = 20, float lifeTime = 1.0f, sf::Vector2f velocity = { 0.f, -50.f });
-private:
+    void spawnFloatingText(const std::string& str, sf::Vector2f pos, sf::Color color, int size = 20, float lifeTime = 1.0f, sf::Vector2f velocity = {0.f, -50.f});
+
+   private:
     void processEvents();
     void update(sf::Time dt);
     void render();
@@ -74,7 +75,7 @@ private:
     sf::Sprite m_winSprite;
 
     float m_videoTimer = 0.f;
-    float m_videoDuration = 5.0f; // 影片長度
+    float m_videoDuration = 5.0f;  // 影片長度
 
     void loadResources();
     void updateUI();

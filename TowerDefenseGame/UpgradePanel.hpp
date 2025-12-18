@@ -1,11 +1,11 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <cmath> 
+#include <cmath>
 #include <format>
 
 #include "Config.hpp"
-#include "Tower.hpp"
 #include "PlayerStats.hpp"
+#include "Tower.hpp"
 
 class UpgradePanel {
    public:
@@ -198,8 +198,7 @@ class UpgradePanel {
         if (m_selectedTower->getType() == TowerType::Gambler) {
             std::string content = std::format(
                 "GOD OF GAMBLERS\n\nDamage: {}\n(Scales w/ Gold)\n\nEffects:\n- 90% Slow Aura\n- +$5 per shot\n- RNG DMG",
-                m_selectedTower->getDamage()
-            );
+                m_selectedTower->getDamage());
             m_infoText.setString(content);
 
             // 隱藏升級與賣出按鈕 (移到畫面外或設為透明)
