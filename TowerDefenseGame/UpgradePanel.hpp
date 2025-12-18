@@ -201,8 +201,7 @@ class UpgradePanel {
                 m_selectedTower->getDamage());
             m_infoText.setString(content);
 
-            // 隱藏升級與賣出按鈕 (移到畫面外或設為透明)
-            // 這裡簡單做：將按鈕設為不可見或文字清空
+            // 隱藏升級與賣出按鈕 (文字清空和設為透明)
             m_btnUpShape.setFillColor(sf::Color::Transparent);
             m_btnUpLabel.setString("");
             m_btnUpPriceLabel.setString("");

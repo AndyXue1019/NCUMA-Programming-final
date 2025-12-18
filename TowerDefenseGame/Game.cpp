@@ -27,18 +27,16 @@ Game::Game()
 
     loadResources();
     initMenu();
-    initTestPath();
-    m_map.addPath(m_testPath);
+    initPath();
+    m_map.addPath(m_path);
 
     m_gameState = GameState::MainMenu;
     m_gameUI = std::make_unique<GameUI>(m_font, m_playerStats);
     m_upgradePanel = std::make_unique<UpgradePanel>(m_font);
     m_inventoryPanel = std::make_unique<InventoryPanel>(m_font, m_playerStats);
 
-    m_waveManager = std::make_unique<WaveManager>(m_enemies, m_testPath, m_playerStats);
+    m_waveManager = std::make_unique<WaveManager>(m_enemies, m_path, m_playerStats);
 
-    // 載入影片截圖 ( GodOfGamblers.jpg)
-    // DEBUG
     if (!m_videoTexture.loadFromFile("GodOfGamblers.jpg")) {
         std::cout << "Image NOT found! Creating RED fallback." << std::endl;
         sf::Image img;
@@ -68,7 +66,6 @@ Game::Game()
         }
     }
 
-    // 2. 取得這張圖片專屬的大小
     sf::Vector2u finishSize = m_finishTexture.getSize();
 
     m_finishSprite.setTexture(m_finishTexture);
@@ -116,16 +113,15 @@ void Game::loadResources() {
     m_uiText.setPosition({10.f, 10.f});
 }
 
-void Game::initTestPath() {
-    m_testPath.push_back({0.f, 100.f});
-    m_testPath.push_back({300.f, 100.f});
-    m_testPath.push_back({300.f, 500.f});
-    m_testPath.push_back({800.f, 500.f});
-    m_testPath.push_back({800.f, 200.f});
-    m_testPath.push_back({1280.f, 200.f});
+void Game::initPath() {
+    m_path.push_back({0.f, 100.f});
+    m_path.push_back({300.f, 100.f});
+    m_path.push_back({300.f, 500.f});
+    m_path.push_back({800.f, 500.f});
+    m_path.push_back({800.f, 200.f});
+    m_path.push_back({1280.f, 200.f});
 }
 
-// 實作檢查事件
 void Game::checkGamblerEvent() {
     if (m_playerStats.gold >= 100000 && !m_playerStats.hasTriggeredGamblerEvent) {
         m_gameState = GameState::GamblerEventPrompt;
@@ -133,7 +129,6 @@ void Game::checkGamblerEvent() {
     }
 }
 
-// 實作變身邏輯
 void Game::triggerGamblerTransformation() {
     m_playerStats.gold = 0;
 
@@ -209,12 +204,14 @@ void Game::processEvents() {
             return;
         }
 
+        // 一般遊戲事件處理
         if (const auto* mouseMove = event->getIf<sf::Event::MouseMoved>()) {
             sf::Vector2f mousePos(static_cast<float>(mouseMove->position.x), static_cast<float>(mouseMove->position.y));
             if (m_inventoryPanel) {
                 m_inventoryPanel->handleMouseMove(mousePos);
             }
         } else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+            // 按下 Enter 或 Space 鍵開始下一波
             using Key = sf::Keyboard::Key;
             if (keyPressed->code == Key::Enter or keyPressed->code == Key::Space) {
                 if (m_gameState == GameState::Shop && m_playerStats.currentWave < 20) {
@@ -279,7 +276,6 @@ void Game::handleShopClick(sf::Vector2f mousePos) {
     // 取得目前該塔的庫存
     int currentStock = m_playerStats.inventory[type];
 
-    // [修正] 商店階段的邏輯優化
     if (m_gameState == GameState::Shop) {
         // 特例：如果是賭神塔，且我們已經擁有它 -> 視為「選取」而不是購買
         if (type == TowerType::Gambler && m_playerStats.hasGambler) {
@@ -296,11 +292,8 @@ void Game::handleShopClick(sf::Vector2f mousePos) {
         } else {
             std::cout << "Not enough gold!" << std::endl;
         }
-
-        // (選用優化) 如果你希望一般塔買了之後直接選取，可以加這行：
-        // if (m_playerStats.inventory[type] > 0) m_selectedTower = type;
     }
-    // 戰鬥階段的邏輯 (維持不變)
+    // 戰鬥階段的邏輯
     else if (m_gameState == GameState::WaveRunning) {
         if (currentStock > 0) {
             m_selectedTower = type;
@@ -576,7 +569,6 @@ void Game::initMenu() {
     float startY = 350.f;
     float gap = 100.f;
 
-    // 這裡 init 不再需要傳 m_font
     m_btnStart.init("Start", {centerX, startY}, {200.f, 60.f});
     m_btnRules.init("Rules", {centerX, startY + gap}, {200.f, 60.f});
 

@@ -6,8 +6,7 @@
 #include "Config.hpp"
 #include "TowerData.hpp"
 
-// 定義金色
-static const sf::Color GOLD_COLOR(255, 215, 0);
+static const sf::Color GOLD_COLOR(255, 215, 0);  // 金色
 
 GameUI::GameUI(const sf::Font& font, PlayerStats& stats)
     : m_font(font),
@@ -36,14 +35,13 @@ GameUI::GameUI(const sf::Font& font, PlayerStats& stats)
     float heartX = static_cast<float>(Config::WINDOW_WIDTH) - 130.f;
     float heartY = static_cast<float>(Config::WINDOW_HEIGHT) - 110.f;
 
-    // Sprite 已經綁定 Texture，這裡只要設定位置顏色
     m_heartBg.setPosition({heartX, heartY});
     m_heartBg.setColor(sf::Color(50, 0, 0, 150));  // 深紅色半透明 (背景)
 
     m_heartFill.setPosition({heartX, heartY});
     m_heartFill.setColor(sf::Color(255, 0, 0));  // 亮紅色 (血量)
 
-    // 血量文字 (顯示在愛心中央)
+    // 血量文字
     m_hpText.setCharacterSize(20);
     m_hpText.setFillColor(sf::Color::White);
     m_hpText.setOutlineColor(sf::Color::Black);

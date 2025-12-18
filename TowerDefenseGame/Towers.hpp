@@ -34,30 +34,29 @@ class BasicTower : public Tower {
             bool isIce = false;
             bool isExplosive = false;
 
-            // --- 1. 火焰寶石 (機率: 10 + 5 * Level %) ---
+            // 1. 火焰寶石 (機率: 10 + 5 * Level %
             if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
                 int chance = 10 + 5 * m_level;
                 if (Utils::m_rand() < chance) isFire = true;
             }
 
-            // --- 2. 寒冰寶石 (機率: 3%) ---
+            // 2. 寒冰寶石 (機率: 3%)
             if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
                 int chance = 3 + 2 * m_level;
                 if (Utils::m_rand() < chance) isIce = true;
             }
 
-            // --- 3. 爆裂寶石 (機率: 10%) ---
+            // 3. 爆裂寶石 (機率: 10%)
             if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
                 int chance = 10 + 3 * m_level;
                 if (Utils::m_rand() < chance) isExplosive = true;
             }
 
-            // 發射子彈 (傳入所有效果 flag)
+            // 發射子彈
             m_projectiles.push_back(std::make_unique<Projectile>(
                 getPosition(), target, m_enemies, m_damage, isFire, isIce, isExplosive));
 
-            // 使用 getEffectiveCooldown() 支援風暴寶石加速
-            m_currentCooldown = getEffectiveCooldown();
+            m_currentCooldown = getEffectiveCooldown();  // 支援風暴寶石
         }
     }
 };
@@ -104,8 +103,6 @@ class LaserTower : public Tower {
 
             bool triggeredEffect = false;
 
-            // --- 寶石效果判定 (直接對敵人作用) ---
-
             // 1. 火焰
             if (m_stats.isAccessoryActive(AccessoryType::FireGem) && Utils::m_rand() < (10 + 5 * m_level)) {
                 target->applyBurn(5.0f);
@@ -116,7 +113,7 @@ class LaserTower : public Tower {
                 target->applyStun(1.0f);
                 triggeredEffect = true;
             }
-            // 3. 爆裂 (雷射觸發爆炸)
+            // 3. 爆裂
             if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem) && Utils::m_rand() < 10) {
                 float range = 100.f;
                 int explosionDmg = m_damage * 2;
@@ -210,7 +207,6 @@ class SlowTower : public Tower {
                 enemy->applySlow(0.5f, 1.0f);
                 hitAny = true;
 
-                // 緩速塔也能觸發寶石效果 (AOE 觸發)
                 // 1. 火焰
                 if (m_stats.isAccessoryActive(AccessoryType::FireGem)) {
                     if (Utils::m_rand() < (10 + 5 * m_level)) enemy->applyBurn(5.0f);
@@ -218,10 +214,6 @@ class SlowTower : public Tower {
                 // 2. 寒冰 (雙重控制！)
                 if (m_stats.isAccessoryActive(AccessoryType::IceGem)) {
                     if (Utils::m_rand() < 3) enemy->applyStun(1.0f);
-                }
-                // 3. 爆裂
-                if (m_stats.isAccessoryActive(AccessoryType::ExplosiveGem)) {
-                    if (Utils::m_rand() < 10) enemy->takeDamage(50);  // 緩速塔本身沒傷害，給予固定傷害
                 }
             }
         }
@@ -359,31 +351,26 @@ class GamblerTower : public Tower {
         m_range = 300.f;
         m_cooldownTime = 0.2f;  // 射速很快
 
-        // 初始值為一般塔的 3 倍 (Basic Dmg=20) -> 60
         m_baseDamage = 60;
     }
 
-    // 覆寫 getDamage，根據金錢計算
     int getDamage() const {
         // 每擁有 20 金幣基礎數值 +2
         int bonus = (m_stats.gold / 20) * 2;
         return m_baseDamage + bonus;
     }
 
-    // 覆寫 update 來顯示特殊特效或光環
     void update(sf::Time dt) override {
         Tower::update(dt);
 
-        // --- 90% 緩速光環 ---
+        // 90% 緩速光環
         for (const auto& enemy : m_enemies) {
             if (enemy->isActive() && Utils::distance(getPosition(), enemy->getPosition()) <= m_range) {
-                // 90% 減速 = 速度剩 0.1 倍
-                enemy->applySlow(0.1f, 0.1f);  // 持續時間短，因為每幀更新
+                enemy->applySlow(0.1f, 0.1f);  // 因為每幀更新，所以持續時間短
             }
         }
     }
 
-    // 覆寫 performAction 處理特殊的攻擊機率
     void performAction() override {
         auto target = findTarget(m_range);
         if (target) {
@@ -392,9 +379,7 @@ class GamblerTower : public Tower {
                 m_onTextRequest("+$5", getPosition() + sf::Vector2f(0, -30), sf::Color::Yellow);
             }
 
-            // 骰機率
             int r = Utils::m_rand();  // 0-99
-
             int finalDmg = getDamage();
             if (r < 5) {
                 // 5% 秒殺
@@ -414,7 +399,7 @@ class GamblerTower : public Tower {
                 if (m_onTextRequest) {
                     m_onTextRequest("MISS...", target->getPosition(), sf::Color(150, 150, 150));  // 灰色
                 }
-            }
+            }  // 50% 正常傷害
 
             bool isFire = m_stats.isAccessoryActive(AccessoryType::FireGem) && (Utils::m_rand() < 50);
             bool isIce = m_stats.isAccessoryActive(AccessoryType::IceGem) && (Utils::m_rand() < 20);

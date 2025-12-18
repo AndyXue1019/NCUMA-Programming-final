@@ -40,6 +40,7 @@ class Enemy : public Entity {
     int getExp() const { return m_expReward; }
 
    private:
+    sf::Color m_color = sf::Color::Red;
     sf::CircleShape m_shape;
     std::vector<sf::Vector2f> m_path;
     std::size_t m_currentWaypointIndex = 0;

@@ -39,8 +39,8 @@ class Game {
     void update(sf::Time dt);
     void render();
 
-    void initTestPath();
-    std::vector<sf::Vector2f> m_testPath;
+    void initPath();
+    std::vector<sf::Vector2f> m_path;
     float m_spawnTimer = 0.f;
 
     sf::RenderWindow m_window;

@@ -218,7 +218,6 @@ class InventoryPanel {
         sf::Text text;
         float lifeTime;
 
-        // 修正：新增建構函式，確保 sf::Text 有被正確初始化
         FloatingText(const sf::Font& font) : text(font), lifeTime(1.0f) {}
     };
     std::vector<FloatingText> m_floatingTexts;
@@ -237,14 +236,13 @@ class InventoryPanel {
         m_stats.addGold(data.price);
         spawnFloatingText(std::format("+{}", data.price), m_trashSlot.getPosition());
 
-        // 2. [關鍵修改] 先從背包移除該寶石
+        // 2. 先從背包移除該寶石
         m_stats.accessories.erase(m_stats.accessories.begin() + index);
 
         // 3. 檢查裝備狀態
         // 如果賣掉的類型剛好是目前裝備的類型
         if (m_stats.activeAccessory == type) {
-            // 檢查背包裡是否「還有」同類型的寶石
-            // m_stats.hasAccessory 是我們之前在 PlayerStats 寫好的 Helper
+            // 檢查背包裡是否"還有"同類型的寶石
             if (!m_stats.hasAccessory(type)) {
                 // 如果已經沒有庫存了，才強制卸下
                 m_stats.activeAccessory = AccessoryType::None;

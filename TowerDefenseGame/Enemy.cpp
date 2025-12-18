@@ -4,7 +4,6 @@
 
 Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type, bool isGamblerMode)
     : m_path(path), m_type(type) {
-    // 根據類型設定數值與外觀
     m_shape.setPointCount(30);
 
     switch (type) {
@@ -14,57 +13,63 @@ Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type, bool isGambl
             m_bounty = 10;
             m_expReward = 5;
             m_shape.setRadius(15.f);
-            m_shape.setFillColor(sf::Color::Red);
+            m_shape.setFillColor(m_color);
             break;
         case EnemyType::Fast:
             m_speed = 150.f;
             m_maxHp = 30;
             m_bounty = 15;
             m_expReward = 8;
+            m_color = sf::Color::Yellow;
             m_shape.setRadius(12.f);
-            m_shape.setFillColor(sf::Color::Yellow);
+            m_shape.setFillColor(m_color);
             break;
         case EnemyType::Tank:
             m_speed = 70.f;
             m_maxHp = 150;
             m_bounty = 20;
             m_expReward = 15;
+            m_color = sf::Color(150, 0, 0);  // 深紅
             m_shape.setRadius(20.f);
-            m_shape.setFillColor(sf::Color(150, 0, 0));  // 深紅
+            m_shape.setFillColor(m_color);
             break;
         case EnemyType::Triangle:
             m_speed = 100.f * 1.5f;                  // 普通敵人的 150% 速度
             m_maxHp = static_cast<int>(50 * 0.75f);  // 普通敵人的 75% 血量 (~37)
             m_bounty = 12;
             m_expReward = 6;
+            m_color = sf::Color(0, 255, 100);  // 亮綠色
             m_shape.setRadius(15.f);
-            m_shape.setPointCount(3);                      // 設定為三角形
-            m_shape.setFillColor(sf::Color(0, 255, 100));  // 亮綠色
+            m_shape.setPointCount(3);  // 設定為三角形
+            m_shape.setFillColor(m_color);
             break;
         case EnemyType::Square:
             m_speed = 100.f * 0.5f;  // 普通敵人的 50% 速度
-            m_maxHp = 50;            // 假設血量跟普通敵人一樣 (或是你想設高一點也可以)
+            m_maxHp = 50;
             m_bounty = 15;
             m_expReward = 8;
+            m_color = sf::Color(100, 100, 255);  // 藍紫色
             m_shape.setRadius(18.f);
-            m_shape.setPointCount(4);                        // 設定為正方形
-            m_shape.setFillColor(sf::Color(100, 100, 255));  // 藍紫色
+            m_shape.setPointCount(4);  // 設定為正方形
+            m_shape.setFillColor(m_color);
             break;
         case EnemyType::MiniBoss:  // Wave 5, 10, 15
             m_speed = 60.f;
             m_maxHp = 500;
             m_bounty = 100;
             m_expReward = 100;
+            m_color = sf::Color::Magenta;
             m_shape.setRadius(30.f);
-            m_shape.setFillColor(sf::Color::Magenta);
+            m_shape.setFillColor(m_color);
             break;
         case EnemyType::FinalBoss:  // Wave 20
             m_speed = 40.f;
             m_maxHp = 5000;
             m_bounty = 1000;
             m_expReward = 1000;
+            m_color = sf::Color::Cyan;
             m_shape.setRadius(50.f);
-            m_shape.setFillColor(sf::Color::Cyan);
+            m_shape.setFillColor(m_color);
             break;
     }
 
@@ -78,7 +83,7 @@ Enemy::Enemy(const std::vector<sf::Vector2f>& path, EnemyType type, bool isGambl
     m_baseSpeed = m_speed;
     m_currentSpeed = m_speed;
     m_hp = m_maxHp;
-    m_shape.setOrigin({m_shape.getRadius(), m_shape.getRadius()});  // SFML 3 寫法
+    m_shape.setOrigin({m_shape.getRadius(), m_shape.getRadius()});
 
     if (!m_path.empty()) m_shape.setPosition(m_path[0]);
 }
@@ -91,7 +96,6 @@ void Enemy::update(sf::Time dt) {
     }
 
     // --- 1. 更新狀態計時器 (Status Timers) ---
-
     // (A) 暈眩計時
     if (m_isStunned) {
         m_stunTimer -= dt.asSeconds();
@@ -129,15 +133,13 @@ void Enemy::update(sf::Time dt) {
 
     if (m_type == EnemyType::Square && !m_isStunned) {  // 暈眩時不能衝刺
         if (m_isDashing) {
-            // 正在衝刺中：倒數計時
+            // 正在衝刺中 倒數計時
             m_dashDurationTimer -= dt.asSeconds();
             if (m_dashDurationTimer <= 0.f) {
                 // 衝刺結束，恢復原本速度 (考慮緩速狀態)
                 m_isDashing = false;
                 if (m_isSlowed) {
                     // 如果原本被緩速，恢復成緩速後的速度
-                    // 這裡假設緩速效果是持續的，你可以根據你的 SlowTower 邏輯調整
-                    // 簡單寫法：重新計算一次當前速度
                     m_currentSpeed = m_baseSpeed * 0.5f;  // 假設緩速是 0.5倍
                 } else {
                     m_currentSpeed = m_baseSpeed;
@@ -161,7 +163,7 @@ void Enemy::update(sf::Time dt) {
     }
 
     // --- 2. 移動邏輯 ---
-    // 只有在「沒有暈眩」的時候才移動
+    // 只有在"沒有暈眩"的時候才移動
     if (!m_isStunned) {
         sf::Vector2f target = m_path[m_currentWaypointIndex];
         sf::Vector2f current = m_shape.getPosition();
@@ -182,9 +184,8 @@ void Enemy::update(sf::Time dt) {
     } else if (m_isSlowed) {
         m_shape.setFillColor(sf::Color(0, 255, 255));  // 青色
     } else {
-        // 恢復原本顏色 (注意：這裡暫時設為紅色，如果你有不同顏色的敵人，
-        // 最好在 Enemy.hpp 加一個 m_originalColor 來記錄並在這裡恢復)
-        m_shape.setFillColor(sf::Color::Red);
+        // 恢復原本顏色
+        m_shape.setFillColor(m_color);
     }
 
     // --- 4. 死亡檢查 ---
@@ -200,10 +201,10 @@ void Enemy::applySlow(float factor, float duration) {
 void Enemy::applyBurn(float duration) {
     m_isBurning = true;
     m_burnTimer = duration;
-    // 不重置 m_burnTickTimer，讓傷害節奏保持連續，或是你可以選擇 m_burnTickTimer = 0.9f 讓它快點觸發
+    // 不重置 m_burnTickTimer，讓傷害節奏保持連續
+    // 可以選擇 m_burnTickTimer = 0.9f 讓它快點觸發
 }
 
-// [新增] 暈眩實作
 void Enemy::applyStun(float duration) {
     m_isStunned = true;
     m_stunTimer = duration;

@@ -11,7 +11,6 @@ class GameUI {
     void draw(sf::RenderWindow& window, bool isShopPhase);
     std::optional<TowerType> handleClick(sf::Vector2f mousePos);
 
-    // 加入這些宣告
     void drawGamblerPrompt(sf::RenderWindow& window);
     int handlePromptClick(sf::Vector2f mousePos);
 
@@ -28,7 +27,7 @@ class GameUI {
         sf::RectangleShape shape;
         sf::Text label;
         sf::Text subLabel;
-        TowerType type;
+        TowerType type = TowerType::Basic;
         bool locked = false;
         Button(const sf::Font& font) : label(font), subLabel(font) {}
     };

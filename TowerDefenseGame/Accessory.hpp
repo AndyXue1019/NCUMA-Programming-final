@@ -3,7 +3,6 @@
 #include <string>
 
 enum class AccessoryType {
-    // updating
     None,
     FireGem,
     IceGem,

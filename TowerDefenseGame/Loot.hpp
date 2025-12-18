@@ -39,7 +39,6 @@ class Loot : public Entity {
     sf::Vector2f getPosition() const override {
         return m_shape.getPosition();
     }
-    // -----------------
 
     bool hasArrived() const { return m_arrived; }
     AccessoryType getType() const { return m_type; }

@@ -105,7 +105,7 @@ sf::Color Map::colorForValue(float normalized) const {
 }
 
 void Map::updateColors() {
-    // 找最大值（已由 addPosition/decay 維護，但保險起見再計算一次）
+    // 找最大值
     float maxv = 0.f;
     for (float v : m_heat)
         if (v > maxv) maxv = v;
