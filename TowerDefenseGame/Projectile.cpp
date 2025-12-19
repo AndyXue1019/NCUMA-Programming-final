@@ -59,8 +59,8 @@ void Projectile::update(sf::Time dt) {
 
         // 4. Ãzµõ®ÄªG (¤p½d³ò AOE)
         if (m_isExplosive) {
-            float range = 100.f;                // Ãz¬µ¥b®|
-            int explosionDmg = m_damage * 1.5;  // 150% ¶Ë®`
+            float range = 100.f;                                  // Ãz¬µ¥b®|
+            int explosionDmg = static_cast<int>(m_damage * 1.5);  // 150% ¶Ë®`
 
             for (const auto& enemy : m_enemies) {
                 if (enemy->isActive() && Utils::distance(m_shape.getPosition(), enemy->getPosition()) <= range) {
