@@ -14,20 +14,20 @@ Projectile::Projectile(sf::Vector2f startPos, std::weak_ptr<Enemy> target,
     m_shape.setPosition(startPos);
 
     // 根據效果改變顏色
-    if (m_isExplosive)
+    if (m_isExplosive) {
         m_shape.setFillColor(sf::Color(139, 0, 0));  // 深紅
-    else if (m_isIce)
+        // setup shockwave only for explosive projectiles
+        m_shockwave.setRadius(10.f);
+        m_shockwave.setOrigin({10.f, 10.f});
+        m_shockwave.setFillColor(sf::Color::Transparent);     // 內部透明
+        m_shockwave.setOutlineColor(sf::Color(255, 100, 0));  // 橘紅色邊框
+        m_shockwave.setOutlineThickness(3.f);
+    } else if (m_isIce)
         m_shape.setFillColor(sf::Color::Cyan);  // 青色
     else if (m_isFire)
         m_shape.setFillColor(sf::Color(255, 69, 0));  // 橘紅
     else
         m_shape.setFillColor(sf::Color::Yellow);
-
-    m_shockwave.setRadius(10.f);
-    m_shockwave.setOrigin({10.f, 10.f});
-    m_shockwave.setFillColor(sf::Color::Transparent);     // 內部透明
-    m_shockwave.setOutlineColor(sf::Color(255, 100, 0));  // 橘紅色邊框
-    m_shockwave.setOutlineThickness(3.f);
 }
 
 void Projectile::update(sf::Time dt) {
@@ -60,11 +60,10 @@ void Projectile::update(sf::Time dt) {
         // 4. 爆裂效果 (小範圍 AOE)
         if (m_isExplosive) {
             float range = 100.f;                                  // 爆炸半徑
-            int explosionDmg = static_cast<int>(m_damage * 1.5);  // 150% 傷害
+            int explosionDmg = static_cast<int>(m_damage * 0.8);  // 80% 傷害
 
             for (const auto& enemy : m_enemies) {
                 if (enemy->isActive() && Utils::distance(m_shape.getPosition(), enemy->getPosition()) <= range) {
-                    if (enemy == targetSp) continue;  // 避免對主目標造成兩次傷害
                     enemy->takeDamage(explosionDmg);
                 }
             }
